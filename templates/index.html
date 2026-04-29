@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MakiYa — Sushi Maki Delivery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --black:      #0c0b09;
+      --offwhite:   #f4ede0;
+      --cream:      #faf6ef;
+      --accent:     #c8363a;
+      --gold:       #c9a14a;
+      --gray:       #6b6560;
+      --light-gray: #e8e0d5;
+      --card-bg:    #1a1713;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--cream);
+      color: var(--black);
+      font-family: 'Outfit', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 4rem;
+      background: rgba(12,11,9,0.96);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(201,161,74,0.18);
+    }
+    .nav-logo {
+      font-family: 'Cormorant', serif;
+      font-size: 1.9rem; font-weight: 600;
+      color: var(--offwhite); letter-spacing: 0.04em;
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--gold); }
+    .nav-right { display: flex; align-items: center; gap: 2rem; }
+    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+    .nav-links a {
+      color: rgba(244,237,224,0.65); text-decoration: none;
+      font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+    .cart-btn {
+      background: var(--accent); border: none; cursor: pointer;
+      color: white; padding: 0.65rem 1.5rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.82rem; font-weight: 500;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      display: flex; align-items: center; gap: 0.6rem;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .cart-btn:hover { background: #a82c2f; transform: translateY(-1px); }
+    .cart-count {
+      background: var(--gold); color: var(--black);
+      width: 20px; height: 20px; border-radius: 50%;
+      font-size: 0.68rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s;
+    }
+    .cart-count.bump { transform: scale(1.35); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      background: var(--black);
+      display: flex; align-items: center;
+      position: relative; overflow: hidden;
+      padding: 8rem 4rem 4rem;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 72% 48%, rgba(200,54,58,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse at 18% 80%, rgba(201,161,74,0.12) 0%, transparent 50%);
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(201,161,74,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,161,74,0.04) 1px, transparent 1px);
+      background-size: 80px 80px;
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 640px; }
+    .hero-eyebrow {
+      font-size: 0.72rem; letter-spacing: 0.32em;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: 1.6rem;
+      display: flex; align-items: center; gap: 1rem;
+      animation: fadeInUp 0.7s 0.1s both;
+    }
+    .hero-eyebrow::before { content:''; display:block; width:40px; height:1px; background:var(--gold); }
+    .hero h1 {
+      font-family: 'Cormorant', serif;
+      font-size: clamp(3.6rem, 6.5vw, 6.2rem); font-weight: 600;
+      color: var(--offwhite); line-height: 1.04; margin-bottom: 1.5rem;
+      animation: fadeInUp 0.7s 0.2s both;
+    }
+    .hero h1 em { font-style: italic; color: var(--gold); }
+    .hero-sub {
+      color: rgba(244,237,224,0.58); font-size: 1.02rem; line-height: 1.75;
+      margin-bottom: 2.6rem; max-width: 460px;
+      animation: fadeInUp 0.7s 0.3s both;
+    }
+    .hero-cta { display: flex; gap: 1.2rem; align-items: center; animation: fadeInUp 0.7s 0.4s both; }
+    .btn-primary {
+      background: var(--accent); color: white; padding: 0.95rem 2.3rem;
+      border: none; cursor: pointer; font-family: 'Outfit', sans-serif;
+      font-size: 0.88rem; font-weight: 500; letter-spacing: 0.09em;
+      text-transform: uppercase; text-decoration: none; display: inline-block;
+      transition: background 0.25s, transform 0.25s;
+    }
+    .btn-primary:hover { background: #a82c2f; transform: translateY(-2px); }
+    .btn-ghost {
+      color: var(--offwhite); font-size: 0.82rem;
+      letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none;
+      border-bottom: 1px solid rgba(244,237,224,0.28); padding-bottom: 2px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+    .hero-deco {
+      position: absolute; right: 5%; top: 50%; transform: translateY(-50%);
+      font-size: 14rem; opacity: 0.06; pointer-events: none; user-select: none;
+      animation: floatDeco 7s ease-in-out infinite;
+    }
+    @keyframes floatDeco {
+      0%,100% { transform: translateY(-50%) rotate(-6deg); }
+      50%      { transform: translateY(-57%) rotate(6deg); }
+    }
+    .hero-stats {
+      position: absolute; bottom: 3rem; left: 4rem;
+      display: flex; gap: 3rem; animation: fadeInUp 0.7s 0.5s both;
+    }
+    .stat-num {
+      font-family: 'Cormorant', serif; font-size: 2rem; font-weight: 700;
+      color: var(--gold); line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(244,237,224,0.45); margin-top: 0.2rem;
+    }
+
+    /* ── SECTION COMMON ── */
+    section { padding: 6rem 4rem; }
+    .section-label {
+      font-size: 0.68rem; letter-spacing: 0.32em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 0.7rem;
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .section-label::before { content:''; display:block; width:28px; height:1px; background:var(--accent); }
+    .section-title {
+      font-family: 'Cormorant', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 600;
+      color: var(--black); margin-bottom: 0.4rem; line-height: 1.1;
+    }
+    .section-sub { color: var(--gray); font-size: 0.92rem; margin-bottom: 3rem; }
+
+    /* ── MENU ── */
+    .menu-section { background: var(--cream); }
+    .menu-top {
+      display: flex; flex-wrap: wrap; justify-content: space-between;
+      align-items: flex-end; margin-bottom: 2.5rem; gap: 1rem;
+    }
+    .menu-cats { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .cat-btn {
+      padding: 0.48rem 1.3rem; border: 1px solid var(--light-gray);
+      background: transparent; cursor: pointer; font-family: 'Outfit', sans-serif;
+      font-size: 0.77rem; font-weight: 500; letter-spacing: 0.09em;
+      text-transform: uppercase; color: var(--gray); transition: all 0.2s;
+    }
+    .cat-btn.active, .cat-btn:hover { background: var(--black); color: var(--offwhite); border-color: var(--black); }
+    .menu-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1.8rem;
+    }
+    .menu-card {
+      background: white; border: 1px solid var(--light-gray); overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .menu-card:hover { transform: translateY(-5px); box-shadow: 0 24px 48px rgba(0,0,0,0.1); }
+    .card-img-wrap {
+      position: relative; height: 190px;
+      background: linear-gradient(135deg, #181411, #261e17);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5.5rem; overflow: hidden;
+    }
+    .card-img-wrap::after {
+      content:''; position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.35), transparent 60%);
+    }
+    .card-badge {
+      position: absolute; top: 0.75rem; left: 0.75rem; z-index: 2;
+      background: var(--accent); color: white;
+      font-size: 0.63rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 0.22rem 0.6rem;
+    }
+    .card-badge.gold { background: var(--gold); color: var(--black); }
+    .card-body { padding: 1.25rem; }
+    .card-name {
+      font-family: 'Cormorant', serif; font-size: 1.28rem; font-weight: 600;
+      color: var(--black); margin-bottom: 0.3rem;
+    }
+    .card-desc { font-size: 0.8rem; color: var(--gray); line-height: 1.55; margin-bottom: 1rem; }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .card-price {
+      font-family: 'Cormorant', serif; font-size: 1.45rem; font-weight: 700; color: var(--black);
+    }
+    .card-price sub { font-size: 0.75rem; font-family: 'Outfit', sans-serif; color: var(--gray); font-weight: 400; }
+    .add-btn {
+      background: var(--black); color: var(--offwhite); border: none; cursor: pointer;
+      width: 36px; height: 36px; font-size: 1.4rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .add-btn:hover { background: var(--accent); transform: scale(1.1); }
+
+    /* ── ABOUT ── */
+    .about-strip { background: var(--black); padding: 5rem 4rem; }
+    .about-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+    .about-left .section-title { color: var(--offwhite); }
+    .about-left p { color: rgba(244,237,224,0.58); line-height: 1.8; font-size: 0.95rem; margin-top: 1rem; }
+    .about-features { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+    .feat-item { display: flex; gap: 0.9rem; align-items: flex-start; }
+    .feat-icon { font-size: 1.6rem; line-height: 1; flex-shrink: 0; }
+    .feat-title { font-size: 0.82rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.2rem; }
+    .feat-desc { font-size: 0.8rem; color: rgba(244,237,224,0.45); line-height: 1.5; }
+    .about-right { background: var(--card-bg); border: 1px solid rgba(201,161,74,0.15); padding: 2.5rem; }
+    .about-right-title { font-family:'Cormorant',serif; font-size:1.4rem; font-weight:600; color:var(--offwhite); margin-bottom:1.5rem; }
+    .how-step { display: flex; gap: 1.2rem; align-items: flex-start; margin-bottom: 1.5rem; }
+    .step-num { font-family:'Cormorant',serif; font-size:2rem; font-weight:700; color:rgba(201,161,74,0.3); line-height:1; flex-shrink:0; min-width:2rem; }
+    .step-title { font-size:0.85rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--offwhite); margin-bottom:0.2rem; }
+    .step-desc { font-size:0.8rem; color:rgba(244,237,224,0.45); line-height:1.5; }
+
+    /* ── CART SIDEBAR ── */
+    .cart-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 200;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .cart-overlay.open { opacity: 1; pointer-events: all; }
+    .cart-sidebar {
+      position: fixed; right: 0; top: 0; bottom: 0; width: 420px;
+      background: var(--black); z-index: 201;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      display: flex; flex-direction: column;
+    }
+    .cart-sidebar.open { transform: translateX(0); }
+    .cart-header {
+      padding: 1.8rem 2rem; border-bottom: 1px solid rgba(244,237,224,0.08);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .cart-title { font-family:'Cormorant',serif; font-size:1.55rem; font-weight:600; color:var(--offwhite); }
+    .close-btn { background:none; border:none; color:rgba(244,237,224,0.5); cursor:pointer; font-size:1.4rem; transition:color 0.2s; }
+    .close-btn:hover { color:var(--offwhite); }
+    .cart-items { flex:1; overflow-y:auto; padding:1.2rem 2rem; }
+    .cart-items::-webkit-scrollbar { width:3px; }
+    .cart-items::-webkit-scrollbar-thumb { background:rgba(244,237,224,0.15); }
+    .cart-empty { text-align:center; margin-top:3.5rem; color:rgba(244,237,224,0.28); font-size:0.88rem; }
+    .empty-icon { font-size:3rem; margin-bottom:0.8rem; }
+    .cart-item { display:flex; gap:0.9rem; align-items:center; padding:1rem 0; border-bottom:1px solid rgba(244,237,224,0.07); }
+    .ci-emoji { font-size:2.3rem; flex-shrink:0; }
+    .ci-info { flex:1; }
+    .ci-name { font-family:'Cormorant',serif; font-size:1rem; font-weight:600; color:var(--offwhite); margin-bottom:0.15rem; }
+    .ci-price { font-size:0.8rem; color:var(--gold); }
+    .ci-controls { display:flex; align-items:center; gap:0.5rem; }
+    .qty-btn {
+      background:rgba(244,237,224,0.08); border:none; cursor:pointer;
+      color:var(--offwhite); width:28px; height:28px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1rem; transition:background 0.2s;
+    }
+    .qty-btn:hover { background:var(--accent); }
+    .qty-val { color:var(--offwhite); font-size:0.88rem; font-weight:500; min-width:18px; text-align:center; }
+    .cart-footer { padding:1.4rem 2rem; border-top:1px solid rgba(244,237,224,0.08); }
+    .cf-row { display:flex; justify-content:space-between; font-size:0.82rem; color:rgba(244,237,224,0.5); margin-bottom:0.45rem; }
+    .cf-total { display:flex; justify-content:space-between; padding-top:0.8rem; margin:0.6rem 0 1.4rem; border-top:1px solid rgba(244,237,224,0.1); }
+    .cf-total-label { font-family:'Cormorant',serif; font-size:1.1rem; font-weight:600; color:var(--offwhite); }
+    .cf-total-amt { font-family:'Cormorant',serif; font-size:1.3rem; font-weight:700; color:var(--gold); }
+    .checkout-btn {
+      width:100%; background:var(--accent); color:white; border:none; cursor:pointer; padding:1rem;
+      font-family:'Outfit',sans-serif; font-size:0.88rem; font-weight:500;
+      letter-spacing:0.1em; text-transform:uppercase; transition:background 0.2s;
+    }
+    .checkout-btn:hover { background:#a82c2f; }
+
+    /* ── CHECKOUT MODAL ── */
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.72); z-index:300;
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none; transition:opacity 0.3s; padding:1rem;
+    }
+    .modal-overlay.open { opacity:1; pointer-events:all; }
+    .modal {
+      background:var(--cream); width:100%; max-width:560px;
+      max-height:92vh; overflow-y:auto;
+      transform:scale(0.95) translateY(18px); transition:transform 0.3s;
+    }
+    .modal-overlay.open .modal { transform:scale(1) translateY(0); }
+    .modal-head {
+      background:var(--black); padding:1.8rem 2rem;
+      display:flex; justify-content:space-between; align-items:center;
+      position:sticky; top:0; z-index:1;
+    }
+    .modal-head-title { font-family:'Cormorant',serif; font-size:1.5rem; font-weight:600; color:var(--offwhite); }
+    .modal-body { padding:2rem; }
+    .fs-title {
+      font-family:'Cormorant',serif; font-size:1.08rem; font-weight:600;
+      color:var(--black); margin-bottom:1rem;
+      display:flex; align-items:center; gap:0.8rem;
+    }
+    .fs-title::after { content:''; flex:1; height:1px; background:var(--light-gray); }
+    .order-summary-box { background:white; border:1px solid var(--light-gray); padding:1.2rem; margin-bottom:2rem; }
+    .os-item { display:flex; justify-content:space-between; font-size:0.86rem; color:var(--gray); padding:0.28rem 0; }
+    .os-total { display:flex; justify-content:space-between; padding-top:0.8rem; margin-top:0.4rem; border-top:1px solid var(--light-gray); font-weight:600; color:var(--black); font-size:0.95rem; }
+    .form-group { margin-bottom:1.15rem; }
+    .form-group label { display:block; font-size:0.72rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray); margin-bottom:0.38rem; }
+    .form-group input, .form-group select, .form-group textarea {
+      width:100%; padding:0.75rem 1rem; border:1px solid var(--light-gray);
+      background:white; font-family:'Outfit',sans-serif; font-size:0.9rem;
+      color:var(--black); outline:none; transition:border-color 0.2s; appearance:none;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--black); }
+    .form-group textarea { resize:vertical; min-height:78px; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .send-options { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1.8rem; }
+    .send-btn {
+      padding:0.95rem 0.5rem; border:none; cursor:pointer;
+      font-family:'Outfit',sans-serif; font-size:0.8rem; font-weight:500;
+      letter-spacing:0.07em; text-transform:uppercase;
+      display:flex; align-items:center; justify-content:center; gap:0.5rem;
+      text-decoration:none; color:white; transition:opacity 0.2s, transform 0.2s;
+    }
+    .send-btn:hover { opacity:0.88; transform:translateY(-2px); }
+    .send-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+    .send-btn.messenger { background:#0084FF; }
+    .send-btn.whatsapp  { background:#25D366; }
+
+    /* ── SUCCESS BANNER ── */
+    .success-banner {
+      display:none; background:#e8f5e9;
+      border:1px solid #a5d6a7; padding:1rem 1.2rem; margin-bottom:1.5rem;
+      font-size:0.88rem; color:#2e7d32;
+      align-items:center; gap:0.7rem;
+    }
+    .success-banner.show { display:flex; }
+    .ref-badge {
+      background:var(--black); color:var(--gold);
+      font-family:'Cormorant',serif; font-size:1rem; font-weight:700;
+      padding:0.1rem 0.5rem; margin-left:0.2rem;
+    }
+
+    /* ── FOOTER ── */
+    footer { background:var(--black); color:rgba(244,237,224,0.4); padding:3rem 4rem; text-align:center; }
+    .footer-logo { font-family:'Cormorant',serif; font-size:1.7rem; color:var(--offwhite); margin-bottom:0.4rem; }
+    .footer-logo span { color:var(--gold); }
+    footer p { font-size:0.8rem; margin-bottom:0.25rem; }
+    .footer-divider { width:40px; height:1px; background:rgba(201,161,74,0.3); margin:1rem auto; }
+
+    /* ── TOAST ── */
+    .toast {
+      position:fixed; bottom:2rem; left:50%;
+      transform:translateX(-50%) translateY(90px);
+      background:var(--black); color:var(--offwhite);
+      padding:0.8rem 1.6rem; border-left:3px solid var(--gold);
+      font-size:0.84rem; z-index:500;
+      display:flex; align-items:center; gap:0.6rem;
+      transition:transform 0.32s cubic-bezier(0.4,0,0.2,1);
+      white-space:nowrap; box-shadow:0 8px 24px rgba(0,0,0,0.3);
+    }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+    .toast.error { border-left-color:var(--accent); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeInUp {
+      from { opacity:0; transform:translateY(28px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:900px) {
+      nav { padding:1rem 1.5rem; }
+      .nav-links { display:none; }
+      .hero { padding:8rem 1.5rem 6rem; }
+      .hero-deco { display:none; }
+      .hero-stats { left:1.5rem; gap:2rem; }
+      section { padding:4rem 1.5rem; }
+      .about-strip { padding:4rem 1.5rem; }
+      .about-inner { grid-template-columns:1fr; gap:2.5rem; }
+      .cart-sidebar { width:100%; }
+      .form-row { grid-template-columns:1fr; }
+      .send-options { grid-template-columns:1fr; }
+      footer { padding:2.5rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="#home" class="nav-logo">Maki<span>Ya</span></a>
+  <ul class="nav-links">
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="cart-btn" onclick="openCart()">
+      🛒 Cart
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Fresh · Handcrafted · Delivered</p>
+    <h1>Artisan <em>Sushi<br>Maki</em> Delivered<br>to Your Door</h1>
+    <p class="hero-sub">Premium handcrafted sushi maki rolls made with the freshest ingredients. Order now and have it delivered straight to your doorstep.</p>
+    <div class="hero-cta">
+      <a href="#menu" class="btn-primary">Order Now</a>
+      <a href="#about" class="btn-ghost">How It Works</a>
+    </div>
+  </div>
+  <div class="hero-deco">🍣</div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">13+</div>
+      <div class="stat-label">Menu Items</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">Fresh</div>
+      <div class="stat-label">Daily Made</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">Fast</div>
+      <div class="stat-label">Delivery</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MENU ── -->
+<section class="menu-section" id="menu">
+  <div class="section-label">What We Offer</div>
+  <h2 class="section-title">Our Menu</h2>
+  <p class="section-sub">All rolls are made fresh upon order. Choose your favorites below.</p>
+  <div class="menu-top">
+    <div class="menu-cats" id="menuCats">
+      <button class="cat-btn active" data-cat="all">All</button>
+      <button class="cat-btn" data-cat="classic">Classic Maki</button>
+      <button class="cat-btn" data-cat="premium">Premium Rolls</button>
+      <button class="cat-btn" data-cat="baked">Baked Maki</button>
+      <button class="cat-btn" data-cat="party">Party Trays</button>
+    </div>
+  </div>
+  <div class="menu-grid" id="menuGrid"></div>
+</section>
+
+<!-- ── ABOUT ── -->
+<section class="about-strip" id="about">
+  <div class="about-inner">
+    <div class="about-left">
+      <div class="section-label" style="color:var(--gold);">
+        <span style="display:block;width:28px;height:1px;background:var(--gold);"></span>
+        Our Promise
+      </div>
+      <h2 class="section-title">Crafted with<br><em style="font-style:italic;color:var(--gold);">Passion</em></h2>
+      <p>Every roll is handcrafted to order using only the freshest ingredients. From our classic California maki to our signature baked rolls — quality is never compromised.</p>
+      <div class="about-features">
+        <div class="feat-item"><span class="feat-icon">🌊</span><div><div class="feat-title">Fresh Daily</div><div class="feat-desc">Ingredients sourced fresh every day, no day-olds</div></div></div>
+        <div class="feat-item"><span class="feat-icon">👐</span><div><div class="feat-title">Handcrafted</div><div class="feat-desc">Every roll is made by hand with care and precision</div></div></div>
+        <div class="feat-item"><span class="feat-icon">🛵</span><div><div class="feat-title">Fast Delivery</div><div class="feat-desc">We deliver within the area as fast as we can</div></div></div>
+        <div class="feat-item"><span class="feat-icon">❤️</span><div><div class="feat-title">Made with Love</div><div class="feat-desc">A small business run by passionate sushi lovers</div></div></div>
+      </div>
+    </div>
+    <div class="about-right">
+      <div class="about-right-title">How to Order</div>
+      <div class="how-step"><div class="step-num">01</div><div><div class="step-title">Browse &amp; Select</div><div class="step-desc">Pick your favorite rolls and add them to your cart.</div></div></div>
+      <div class="how-step"><div class="step-num">02</div><div><div class="step-title">Fill Your Details</div><div class="step-desc">Enter your name, address, contact number, and payment method.</div></div></div>
+      <div class="how-step"><div class="step-num">03</div><div><div class="step-title">Send via Messenger</div><div class="step-desc">Your order is saved then sent to us via Messenger or WhatsApp.</div></div></div>
+      <div class="how-step" style="margin-bottom:0;"><div class="step-num">04</div><div><div class="step-title">Wait for Delivery</div><div class="step-desc">Freshly made rolls delivered to your doorstep.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer id="contact">
+  <div class="footer-logo">Maki<span>Ya</span></div>
+  <p>Calamba, Laguna, Philippines</p>
+  <p>Fresh Handcrafted Sushi Maki · Delivered to You</p>
+  <div class="footer-divider"></div>
+  <p>© 2025 MakiYa. All rights reserved.</p>
+</footer>
+
+<!-- ── CART SIDEBAR ── -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <span class="cart-title">Your Order</span>
+    <button class="close-btn" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItemsEl">
+    <div class="cart-empty">
+      <div class="empty-icon">🍣</div>
+      <p>Your cart is empty</p>
+      <p style="font-size:0.78rem;margin-top:0.3rem;">Add items from the menu</p>
+    </div>
+  </div>
+  <div class="cart-footer" id="cartFooterEl" style="display:none;">
+    <div class="cf-row"><span>Subtotal</span><span id="cartSubtotal">₱0</span></div>
+    <div class="cf-row"><span>Delivery Fee</span><span>₱50</span></div>
+    <div class="cf-total">
+      <span class="cf-total-label">Total</span>
+      <span class="cf-total-amt" id="cartTotal">₱50</span>
+    </div>
+    <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout →</button>
+  </div>
+</div>
+
+<!-- ── CHECKOUT MODAL ── -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-head-title">Complete Your Order</span>
+      <button class="close-btn" onclick="closeCheckout()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Success banner (shown after save) -->
+      <div class="success-banner" id="successBanner">
+        ✅ Order saved! Reference: <span class="ref-badge" id="orderRef">—</span>
+        &nbsp;Now send it to us below.
+      </div>
+
+      <div class="fs-title">Order Summary</div>
+      <div class="order-summary-box" id="modalSummaryEl"></div>
+
+      <div class="fs-title">Delivery Details</div>
+      <div class="form-group"><label>Full Name *</label><input type="text" id="fName" placeholder="Juan dela Cruz" /></div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone Number *</label><input type="tel" id="fPhone" placeholder="09XX XXX XXXX" /></div>
+        <div class="form-group">
+          <label>Payment Method *</label>
+          <select id="fPayment">
+            <option value="">Select…</option>
+            <option>Cash on Delivery</option>
+            <option>GCash</option>
+            <option>Maya</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Delivery Address *</label><input type="text" id="fAddress" placeholder="Street, Barangay, City" /></div>
+      <div class="form-group">
+        <label>Special Instructions <span style="text-transform:none;font-weight:400;">(optional)</span></label>
+        <textarea id="fNotes" placeholder="Landmarks, allergy notes, preferences…"></textarea>
+      </div>
+
+      <div class="send-options">
+        <button class="send-btn messenger" id="btnMessenger" onclick="handleSend('messenger')">💬 Order via Messenger</button>
+        <button class="send-btn whatsapp"  id="btnWhatsapp"  onclick="handleSend('whatsapp')">📱 Order via WhatsApp</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"><span id="toastIcon">✓</span><span id="toastMsg">Item added!</span></div>
+
+<script>
+/* ══════════════════════════════════════
+   🔧 CONFIGURATION — update these!
+══════════════════════════════════════ */
+const CFG = {
+  businessName:  "MakiYa",
+  messengerUser: "YOUR_PAGE_USERNAME",   // e.g.  makiya.calamba
+  whatsappNo:    "639XXXXXXXXX",         // e.g.  639171234567
+  deliveryFee:   50,
+  apiBase:       "",                     // empty = same origin (Flask serves index.html)
+};
+
+/* ══════════════════════════════════════
+   MENU DATA
+══════════════════════════════════════ */
+const MENU = [
+  { id:1,  cat:"classic", emoji:"🍣", name:"California Maki",          price:149, desc:"Crab stick, cucumber, mango, tobiko",               badge:null },
+  { id:2,  cat:"classic", emoji:"🌶️", name:"Spicy Tuna Maki",          price:179, desc:"Fresh tuna, spicy mayo, cucumber, sesame seeds",    badge:null },
+  { id:3,  cat:"classic", emoji:"🦐", name:"Ebi Tempura Maki",         price:169, desc:"Crispy prawn tempura, avocado, Japanese mayo",      badge:null },
+  { id:4,  cat:"classic", emoji:"🦀", name:"Kani Maki",                price:149, desc:"Kani stick, mayo, cucumber, rolled in tobiko",      badge:null },
+  { id:5,  cat:"premium", emoji:"🐉", name:"Dragon Roll",              price:229, desc:"Prawn tempura inside, avocado on top, unagi sauce", badge:"Best Seller" },
+  { id:6,  cat:"premium", emoji:"🌈", name:"Rainbow Roll",             price:259, desc:"California inside, assorted sashimi topping",       badge:null },
+  { id:7,  cat:"premium", emoji:"🐟", name:"Salmon Lovers Roll",       price:239, desc:"Salmon, cream cheese, cucumber, sesame",            badge:"New" },
+  { id:8,  cat:"premium", emoji:"🌋", name:"Volcano Roll",             price:249, desc:"Spicy kani inside, baked creamy topping",           badge:null },
+  { id:9,  cat:"baked",   emoji:"🔥", name:"Baked Salmon Maki",        price:219, desc:"Salmon, cream cheese, baked golden perfection",     badge:"Fan Fave" },
+  { id:10, cat:"baked",   emoji:"🐚", name:"Baked Scallop Maki",       price:229, desc:"Scallop, Japanese mayo, cheese, torched top",       badge:null },
+  { id:11, cat:"baked",   emoji:"🦀", name:"Baked Crab Maki",          price:209, desc:"Crab mix, creamy baked topping, masago",            badge:null },
+  { id:12, cat:"party",   emoji:"🎉", name:"Maki Party Tray (32 pcs)", price:549, desc:"Mix: California, Spicy Tuna, Ebi Tempura",          badge:"Value" },
+  { id:13, cat:"party",   emoji:"🥳", name:"Premium Party Tray (40 pcs)",price:849,desc:"Dragon, Rainbow, Salmon Lovers, Baked Salmon",     badge:null },
+];
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let cart = {};
+let activeFilter = "all";
+let savedOrderRef = null;   // filled after successful API save
+
+/* ══════════════════════════════════════
+   MENU RENDER
+══════════════════════════════════════ */
+function renderMenu() {
+  const items = activeFilter === "all" ? MENU : MENU.filter(i => i.cat === activeFilter);
+  document.getElementById("menuGrid").innerHTML = items.map(item => `
+    <div class="menu-card">
+      <div class="card-img-wrap">
+        ${item.badge ? `<span class="card-badge${item.badge==='New'?' gold':''}">${item.badge}</span>` : ''}
+        <span>${item.emoji}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-name">${item.name}</div>
+        <div class="card-desc">${item.desc}</div>
+        <div class="card-footer">
+          <div class="card-price">₱${item.price}<sub> / order</sub></div>
+          <button class="add-btn" onclick="addToCart(${item.id})" title="Add to cart">+</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+document.getElementById("menuCats").addEventListener("click", e => {
+  const btn = e.target.closest(".cat-btn");
+  if (!btn) return;
+  document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  activeFilter = btn.dataset.cat;
+  renderMenu();
+});
+
+/* ══════════════════════════════════════
+   CART
+══════════════════════════════════════ */
+function addToCart(id) {
+  const item = MENU.find(i => i.id === id);
+  if (!item) return;
+  cart[id] ? cart[id].qty++ : (cart[id] = { ...item, qty: 1 });
+  refreshCartUI();
+  const cc = document.getElementById("cartCount");
+  cc.classList.remove("bump");
+  requestAnimationFrame(() => cc.classList.add("bump"));
+  setTimeout(() => cc.classList.remove("bump"), 300);
+  showToast(`${item.emoji} ${item.name} added to cart`);
+}
+function changeQty(id, delta) {
+  if (!cart[id]) return;
+  cart[id].qty += delta;
+  if (cart[id].qty <= 0) delete cart[id];
+  refreshCartUI();
+}
+const subtotal  = () => Object.values(cart).reduce((s, i) => s + i.price * i.qty, 0);
+const total     = () => subtotal() + CFG.deliveryFee;
+const itemCount = () => Object.values(cart).reduce((s, i) => s + i.qty, 0);
+const fmt       = n => `₱${n.toLocaleString()}`;
+
+function refreshCartUI() {
+  document.getElementById("cartCount").textContent = itemCount();
+  const items    = Object.values(cart);
+  const itemsEl  = document.getElementById("cartItemsEl");
+  const footerEl = document.getElementById("cartFooterEl");
+  if (!items.length) {
+    itemsEl.innerHTML = `<div class="cart-empty"><div class="empty-icon">🍣</div><p>Your cart is empty</p><p style="font-size:0.78rem;margin-top:0.3rem;">Add items from the menu</p></div>`;
+    footerEl.style.display = "none";
+    return;
+  }
+  itemsEl.innerHTML = items.map(i => `
+    <div class="cart-item">
+      <span class="ci-emoji">${i.emoji}</span>
+      <div class="ci-info">
+        <div class="ci-name">${i.name}</div>
+        <div class="ci-price">${fmt(i.price * i.qty)}</div>
+      </div>
+      <div class="ci-controls">
+        <button class="qty-btn" onclick="changeQty(${i.id}, -1)">−</button>
+        <span class="qty-val">${i.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${i.id},  1)">+</button>
+      </div>
+    </div>
+  `).join('');
+  footerEl.style.display = "block";
+  document.getElementById("cartSubtotal").textContent = fmt(subtotal());
+  document.getElementById("cartTotal").textContent    = fmt(total());
+}
+const openCart  = () => { document.getElementById("cartOverlay").classList.add("open"); document.getElementById("cartSidebar").classList.add("open"); };
+const closeCart = () => { document.getElementById("cartOverlay").classList.remove("open"); document.getElementById("cartSidebar").classList.remove("open"); };
+
+/* ══════════════════════════════════════
+   CHECKOUT
+══════════════════════════════════════ */
+function openCheckout() {
+  closeCart();
+  savedOrderRef = null;
+  document.getElementById("successBanner").classList.remove("show");
+  setBtnsDisabled(false);
+
+  // build summary
+  const items = Object.values(cart);
+  document.getElementById("modalSummaryEl").innerHTML =
+    items.map(i => `<div class="os-item"><span>${i.emoji} ${i.name} × ${i.qty}</span><span>${fmt(i.price * i.qty)}</span></div>`).join('') +
+    `<div class="os-item"><span>Delivery Fee</span><span>${fmt(CFG.deliveryFee)}</span></div>` +
+    `<div class="os-total"><span>Total</span><span>${fmt(total())}</span></div>`;
+
+  document.getElementById("checkoutModal").classList.add("open");
+}
+const closeCheckout = () => document.getElementById("checkoutModal").classList.remove("open");
+
+function getFormData() {
+  const name    = document.getElementById("fName").value.trim();
+  const phone   = document.getElementById("fPhone").value.trim();
+  const address = document.getElementById("fAddress").value.trim();
+  const payment = document.getElementById("fPayment").value;
+  const notes   = document.getElementById("fNotes").value.trim();
+  return { name, phone, address, payment, notes };
+}
+
+function validateForm() {
+  const { name, phone, address, payment } = getFormData();
+  if (!name || !phone || !address || !payment) {
+    showToast("⚠️ Please fill in all required fields", true);
+    return false;
+  }
+  return true;
+}
+
+function setBtnsDisabled(disabled) {
+  ["btnMessenger","btnWhatsapp"].forEach(id => {
+    document.getElementById(id).disabled = disabled;
+  });
+}
+
+/* ── Save order to Flask, then open messaging app ── */
+async function handleSend(platform) {
+  if (!validateForm()) return;
+
+  const form  = getFormData();
+  const items = Object.values(cart).map(i => ({ name: i.name, qty: i.qty, price: i.price, emoji: i.emoji }));
+
+  setBtnsDisabled(true);
+  showToast("💾 Saving your order…");
+
+  try {
+    const res = await fetch(`${CFG.apiBase}/api/order`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...form,
+        items,
+        subtotal: subtotal(),
+        delivery: CFG.deliveryFee,
+        total:    total(),
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || "Server error");
+    }
+
+    // Show success ref banner
+    savedOrderRef = data.ref;
+    document.getElementById("orderRef").textContent = data.ref;
+    document.getElementById("successBanner").classList.add("show");
+    setBtnsDisabled(false);
+    showToast(`✅ Order ${data.ref} saved!`);
+
+    // Build message and open messaging platform
+    openMessaging(platform, form, items, data.ref);
+
+  } catch (err) {
+    setBtnsDisabled(false);
+    showToast(`❌ Could not save: ${err.message}`, true);
+  }
+}
+
+function openMessaging(platform, form, items, ref) {
+  const lineItems = items.map(i => `  • ${i.name} × ${i.qty} — ${fmt(i.price * i.qty)}`).join('\n');
+  const msg =
+    `🍣 *New Order — ${CFG.businessName}*\n` +
+    `📋 Ref: ${ref}\n\n` +
+    `👤 Name: ${form.name}\n` +
+    `📱 Phone: ${form.phone}\n` +
+    `📍 Address: ${form.address}\n` +
+    `💳 Payment: ${form.payment}\n\n` +
+    `🛒 Items:\n${lineItems}\n\n` +
+    `Subtotal: ${fmt(subtotal())}\n` +
+    `Delivery: ${fmt(CFG.deliveryFee)}\n` +
+    `✅ *Total: ${fmt(total())}*` +
+    (form.notes ? `\n\n📝 Notes: ${form.notes}` : '');
+
+  const encoded = encodeURIComponent(msg);
+  const url = platform === "whatsapp"
+    ? `https://wa.me/${CFG.whatsappNo}?text=${encoded}`
+    : `https://m.me/${CFG.messengerUser}?text=${encoded}`;
+
+  window.open(url, "_blank");
+}
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+let toastTimer;
+function showToast(msg, isError = false) {
+  clearTimeout(toastTimer);
+  document.getElementById("toastMsg").textContent = msg;
+  const el = document.getElementById("toast");
+  el.classList.toggle("error", isError);
+  el.classList.add("show");
+  toastTimer = setTimeout(() => el.classList.remove("show"), 3000);
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+renderMenu();
+</script>
+</body>
+</html>
