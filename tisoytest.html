@@ -575,8 +575,8 @@
 
 <!-- PROMO STRIP -->
 <div class="promo-strip">
-  <span class="promo-badge">🎉 LIMITED OFFER</span>
-  FREE Delivery on orders ₱500 &amp; above · Cavite &amp; Manila areas
+  <span class="promo-badge">📍 Dasmariñas, Cavite</span>
+  Delivery Fee: Depends on Lalamove · Fast Service
   <span class="promo-badge">📞 0995 450 8647</span>
 </div>
 
@@ -824,63 +824,55 @@
 
 <script>
 /* ════════════════════════════════════════
-   DATA — Easy to customize!
-   Add your actual menu items here later.
+   DATA
 ════════════════════════════════════════ */
 const categories = [
-  { id:'bestsellers', label:'Best Sellers',  emoji:'🔥', desc:'Our most-ordered sushi and maki rolls' },
-  { id:'maki',        label:'Maki Rolls',    emoji:'🌀', desc:'Classic and specialty maki rolls' },
-  { id:'sushi',       label:'Nigiri/Sushi',  emoji:'🍣', desc:'Premium fresh nigiri and sushi pieces' },
-  { id:'sets',        label:'Sushi Sets',    emoji:'🍱', desc:'Complete sushi sets — great for sharing!' },
-  { id:'extras',      label:'Add-Ons',       emoji:'🥢', desc:'Sides, sauces, and add-ons' },
-  { id:'drinks',      label:'Drinks',        emoji:'🥤', desc:'Refreshing beverages to go with your meal' },
+  { id:'bestsellers', label:'Best Sellers', emoji:'🔥', desc:'Our most-ordered sushi and maki rolls' },
+  { id:'maki', label:'Maki Rolls', emoji:'🌀', desc:'Classic and specialty maki rolls' },
+  { id:'sushi', label:'Nigiri/Sushi', emoji:'🍣', desc:'Premium fresh nigiri and sushi pieces' },
+  { id:'sets', label:'Sushi Sets', emoji:'🍱', desc:'Complete sushi sets — great for sharing!' },
+  { id:'extras', label:'Add-Ons', emoji:'🥢', desc:'Sides, sauces, and add-ons' },
+  { id:'drinks', label:'Drinks', emoji:'🥤', desc:'Refreshing beverages to go with your meal' },
 ];
 
-/* ─────────────────────────────────────
-   MENU ITEMS
-   To add more items:
-   { id, name, desc, price, emoji, tag }
-   tag: 'bestseller' | 'new' | 'spicy' | undefined
-   To mark as coming soon: comingSoon: true
-─────────────────────────────────────── */
 const menu = {
   bestsellers: [
-    { id:1,  name:'Dragon Roll',        desc:'Crispy shrimp tempura, cucumber, topped with avocado & tobiko', price:299, emoji:'🐉', tag:'bestseller' },
-    { id:2,  name:'Spicy Tuna Maki',    desc:'Fresh tuna with sriracha mayo and cucumber (8 pcs)', price:249, emoji:'🌶️', tag:'spicy' },
-    { id:3,  name:'California Roll',    desc:'Crab stick, avocado, cucumber, sesame seeds (8 pcs)', price:199, emoji:'🌀', tag:'bestseller' },
-    { id:4,  name:'Salmon Nigiri Set',  desc:'Premium fresh salmon slices over seasoned rice (6 pcs)', price:329, emoji:'🍣', tag:'bestseller' },
+    { id:1, name:'Dragon Roll', desc:'Crispy shrimp tempura, cucumber, topped with avocado & tobiko', price:299, emoji:'🐉', tag:'bestseller' },
+    { id:2, name:'Spicy Tuna Maki', desc:'Fresh tuna with sriracha mayo and cucumber (8 pcs)', price:249, emoji:'🌶️', tag:'spicy' },
+    { id:3, name:'California Roll', desc:'Crab stick, avocado, cucumber, sesame seeds (8 pcs)', price:199, emoji:'🌀', tag:'bestseller' },
+    { id:4, name:'Salmon Nigiri Set', desc:'Premium fresh salmon slices over seasoned rice (6 pcs)', price:329, emoji:'🍣', tag:'bestseller' },
   ],
   maki: [
-    { id:5,  name:'California Roll',    desc:'Crab stick, avocado, cucumber, sesame seeds (8 pcs)', price:199, emoji:'🌀' },
-    { id:6,  name:'Spicy Tuna Roll',    desc:'Tuna with spicy mayo and cucumber (8 pcs)', price:249, emoji:'🌶️', tag:'spicy' },
-    { id:7,  name:'Ebi Tempura Roll',   desc:'Crispy shrimp tempura, kani, cucumber (8 pcs)', price:259, emoji:'🍤', tag:'new' },
-    { id:8,  name:'Philadelphia Roll',  desc:'Cream cheese, salmon, cucumber (8 pcs)', price:279, emoji:'🧀' },
-    { id:9,  name:'Rainbow Roll',       desc:'Mixed toppings over California roll (8 pcs)', price:319, emoji:'🌈', tag:'bestseller' },
-    { id:10, name:'Avocado Roll',       desc:'Fresh avocado and cucumber (8 pcs)', price:179, emoji:'🥑' },
+    { id:5, name:'California Roll', desc:'Crab stick, avocado, cucumber, sesame seeds (8 pcs)', price:199, emoji:'🌀' },
+    { id:6, name:'Spicy Tuna Roll', desc:'Tuna with spicy mayo and cucumber (8 pcs)', price:249, emoji:'🌶️', tag:'spicy' },
+    { id:7, name:'Ebi Tempura Roll', desc:'Crispy shrimp tempura, kani, cucumber (8 pcs)', price:259, emoji:'🍤', tag:'new' },
+    { id:8, name:'Philadelphia Roll', desc:'Cream cheese, salmon, cucumber (8 pcs)', price:279, emoji:'🧀' },
+    { id:9, name:'Rainbow Roll', desc:'Mixed toppings over California roll (8 pcs)', price:319, emoji:'🌈', tag:'bestseller' },
+    { id:10, name:'Avocado Roll', desc:'Fresh avocado and cucumber (8 pcs)', price:179, emoji:'🥑' },
   ],
   sushi: [
-    { id:11, name:'Salmon Nigiri',      desc:'Fresh salmon over seasoned sushi rice (2 pcs)', price:129, emoji:'🍣', tag:'bestseller' },
-    { id:12, name:'Tuna Nigiri',        desc:'Premium tuna over seasoned sushi rice (2 pcs)', price:139, emoji:'🍣' },
-    { id:13, name:'Ebi Nigiri',         desc:'Cooked shrimp over seasoned sushi rice (2 pcs)', price:119, emoji:'🍤' },
-    { id:14, name:'Tamago Nigiri',      desc:'Japanese sweet egg over sushi rice (2 pcs)', price:99, emoji:'🥚', tag:'new' },
+    { id:11, name:'Salmon Nigiri', desc:'Fresh salmon over seasoned sushi rice (2 pcs)', price:129, emoji:'🍣', tag:'bestseller' },
+    { id:12, name:'Tuna Nigiri', desc:'Premium tuna over seasoned sushi rice (2 pcs)', price:139, emoji:'🍣' },
+    { id:13, name:'Ebi Nigiri', desc:'Cooked shrimp over seasoned sushi rice (2 pcs)', price:119, emoji:'🍤' },
+    { id:14, name:'Tamago Nigiri', desc:'Japanese sweet egg over sushi rice (2 pcs)', price:99, emoji:'🥚', tag:'new' },
   ],
   sets: [
-    { id:15, name:'Sushi Platter A',    desc:'20 pcs assorted maki + 6 nigiri — perfect for 2-3 pax', price:699, emoji:'🍱', tag:'bestseller' },
-    { id:16, name:'Family Set',         desc:'40 pcs assorted maki + 12 nigiri — feeds 4-6 pax', price:1299, emoji:'👨‍👩‍👧‍👦' },
-    { id:17, name:'Solo Set',           desc:'8 pcs maki + 4 nigiri + 1 miso soup', price:349, emoji:'👤' },
-    { id:18, name:'Barkada Bundle',     desc:'32 pcs maki + 8 nigiri + 4 drinks', price:999, emoji:'🎉', tag:'new' },
+    { id:15, name:'Sushi Platter A', desc:'20 pcs assorted maki + 6 nigiri — perfect for 2-3 pax', price:699, emoji:'🍱', tag:'bestseller' },
+    { id:16, name:'Family Set', desc:'40 pcs assorted maki + 12 nigiri — feeds 4-6 pax', price:1299, emoji:'👨‍👩‍👧‍👦' },
+    { id:17, name:'Solo Set', desc:'8 pcs maki + 4 nigiri + 1 miso soup', price:349, emoji:'👤' },
+    { id:18, name:'Barkada Bundle', desc:'32 pcs maki + 8 nigiri + 4 drinks', price:999, emoji:'🎉', tag:'new' },
   ],
   extras: [
-    { id:19, name:'Extra Wasabi',       desc:'Side of fresh wasabi paste', price:25, emoji:'💚' },
-    { id:20, name:'Extra Soy Sauce',    desc:'Premium soy sauce, 50ml', price:20, emoji:'🫙' },
-    { id:21, name:'Miso Soup',          desc:'Traditional Japanese miso soup with tofu', price:75, emoji:'🍵' },
-    { id:22, name:'Edamame',            desc:'Steamed salted edamame beans', price:99, emoji:'🫛', tag:'new' },
+    { id:19, name:'Extra Wasabi', desc:'Side of fresh wasabi paste', price:25, emoji:'💚' },
+    { id:20, name:'Extra Soy Sauce', desc:'Premium soy sauce, 50ml', price:20, emoji:'🫙' },
+    { id:21, name:'Miso Soup', desc:'Traditional Japanese miso soup with tofu', price:75, emoji:'🍵' },
+    { id:22, name:'Edamame', desc:'Steamed salted edamame beans', price:99, emoji:'🫛', tag:'new' },
   ],
   drinks: [
     { id:23, name:'Japanese Green Tea', desc:'Hot or iced authentic green tea', price:69, emoji:'🍵' },
-    { id:24, name:'Ramune Soda',        desc:'Classic Japanese marble soda — assorted flavors', price:89, emoji:'🫧', tag:'new' },
-    { id:25, name:'Calamansi Juice',    desc:'Fresh squeezed calamansi, lightly sweetened', price:55, emoji:'🍋' },
-    { id:26, name:'Bottled Water',      desc:'500ml chilled mineral water', price:30, emoji:'💧' },
+    { id:24, name:'Ramune Soda', desc:'Classic Japanese marble soda — assorted flavors', price:89, emoji:'🫧', tag:'new' },
+    { id:25, name:'Calamansi Juice', desc:'Fresh squeezed calamansi, lightly sweetened', price:55, emoji:'🍋' },
+    { id:26, name:'Bottled Water', desc:'500ml chilled mineral water', price:30, emoji:'💧' },
   ],
 };
 
@@ -934,7 +926,7 @@ function buildSections() {
 
 function cardHTML(item) {
   const tagHTML = item.tag === 'bestseller' ? `<span class="tag-best">⭐ Best Seller</span>` :
-                  item.tag === 'new'         ? `<span class="tag-new">✨ New</span>` : '';
+                  item.tag === 'new' ? `<span class="tag-new">✨ New</span>` : '';
   const spicyHTML = item.tag === 'spicy' ? `<span class="tag-spicy">🌶️ Spicy</span>` : '';
   return `
   <div class="menu-card">
@@ -966,7 +958,7 @@ function setActiveCat(id) {
 }
 
 /* ════════════════════════════════════════
-   CART LOGIC
+   CART LOGIC — No Free Delivery
 ════════════════════════════════════════ */
 function addToCart(id, name, price, emoji) {
   if(!cart[id]) cart[id] = {id, name, price, emoji, qty:0};
@@ -986,42 +978,41 @@ function updateQty(id, delta) {
 
 function removeItem(id) { delete cart[id]; renderCart(); }
 
-const cartItems  = () => Object.values(cart);
-const cartCount  = () => cartItems().reduce((a,i) => a+i.qty, 0);
-const subtotal   = () => cartItems().reduce((a,i) => a+i.price*i.qty, 0);
-const deliveryFee= () => {
-  if(orderType !== 'delivery') return 0;
-  return subtotal() >= 500 ? 0 : 60;
-};
+const cartItems = () => Object.values(cart);
+const cartCount = () => cartItems().reduce((a,i) => a+i.qty, 0);
+const subtotal = () => cartItems().reduce((a,i) => a+i.price*i.qty, 0);
+const deliveryFee = () => orderType === 'delivery' ? 60 : 0;
 const total = () => subtotal() + deliveryFee();
 
 function renderCart() {
   const items = cartItems(), cnt = cartCount(), sub = subtotal(), fee = deliveryFee(), tot = total();
 
-  // Nav badge
   const nc = document.getElementById('navCartCount');
   nc.textContent = cnt; nc.classList.toggle('hidden', cnt === 0);
 
-  // Order type label in cart header
   const typeLabel = orderType === 'delivery' ? '🛵 Delivery' : orderType === 'pickup' ? '🚶 Pick Up' : '🍽️ Dine-In';
   const otEl = document.getElementById('cartOrderType');
   if(otEl) otEl.textContent = typeLabel;
 
-  // Float btn
   const fb = document.getElementById('floatCart');
-  if(cnt > 0){ fb.style.display='flex'; document.getElementById('fcCount').textContent=cnt; document.getElementById('fcTotal').textContent='₱'+tot; }
-  else { fb.style.display='none'; }
+  if(cnt > 0){ 
+    fb.style.display='flex'; 
+    document.getElementById('fcCount').textContent=cnt; 
+    document.getElementById('fcTotal').textContent='₱'+tot; 
+  } else { 
+    fb.style.display='none'; 
+  }
 
-  // Render both desktop & mobile
   const bodyHTML = cnt===0
     ? `<div class="cart-empty"><div class="e-icon">🍣</div><p>Your cart is empty.<br>Add your favorite sushi!</p></div>`
     : items.map(cartItemHTML).join('');
-  const sumHTML  = cnt>0 ? cartSumHTML(sub, fee, tot) : '';
+  
+  const sumHTML = cnt>0 ? cartSumHTML(sub, fee, tot) : '';
 
   document.getElementById('desktopCartBd').innerHTML = bodyHTML;
   document.getElementById('desktopCartSum').innerHTML = sumHTML;
-  document.getElementById('mobileCartBd').innerHTML   = bodyHTML;
-  document.getElementById('mobileCartSum').innerHTML  = sumHTML;
+  document.getElementById('mobileCartBd').innerHTML = bodyHTML;
+  document.getElementById('mobileCartSum').innerHTML = sumHTML;
 }
 
 function cartItemHTML(item) {
@@ -1043,17 +1034,10 @@ function cartItemHTML(item) {
 }
 
 function cartSumHTML(sub, fee, tot) {
-  const pct = Math.min((sub/500)*100,100);
-  const rem = Math.max(500-sub,0);
-  const freeNote = fee>0
-    ? `<div class="free-note">Add ₱${rem} more for FREE delivery!</div>
-       <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>`
-    : `<div style="color:#16a34a;font-weight:800;font-size:0.78rem;margin-bottom:6px;">🎉 You qualify for FREE delivery!</div>`;
   return `
   <div class="cart-summary">
-    ${freeNote}
     <div class="sum-row"><span>Subtotal</span><span>₱${sub}</span></div>
-    <div class="sum-row"><span>Delivery Fee</span><span>${fee===0?'<span class="free-del">FREE</span>':'₱'+fee}</span></div>
+    <div class="sum-row"><span>Delivery Fee</span><span>₱${fee}</span></div>
     <div class="sum-row total"><span>Total</span><span>₱${tot}</span></div>
     <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout →</button>
     <a class="wa-order-btn" href="${buildWAMsg()}" target="_blank">
@@ -1075,7 +1059,7 @@ function buildWAMsg() {
 }
 
 /* ════════════════════════════════════════
-   CHECKOUT
+   CHECKOUT — Send to Facebook
 ════════════════════════════════════════ */
 function openCheckout() {
   if(!cartCount()) return;
@@ -1083,10 +1067,10 @@ function openCheckout() {
   const items = cartItems(), fee = deliveryFee(), tot = total();
   let html = '<h4>🍣 Order Summary</h4>';
   items.forEach(i => html += `<div class="om-row"><span>${i.emoji} ${i.name} x${i.qty}</span><span>₱${i.price*i.qty}</span></div>`);
-  html += `<div class="om-row"><span>Delivery Fee</span><span>${fee===0?'FREE':'₱'+fee}</span></div>`;
+  html += `<div class="om-row"><span>Delivery Fee</span><span>₱${fee}</span></div>`;
   html += `<div class="om-total"><span>Total</span><span>₱${tot}</span></div>`;
   document.getElementById('checkoutSummary').innerHTML = html;
-  document.getElementById('addrGroup').style.display = orderType==='pickup'||orderType==='dinein' ? 'none' : '';
+  document.getElementById('addrGroup').style.display = (orderType==='pickup'||orderType==='dinein') ? 'none' : '';
   openModal('checkoutModal');
 }
 
@@ -1101,14 +1085,42 @@ function placeOrder() {
   const ln = document.getElementById('lname').value.trim();
   const ph = document.getElementById('phone').value.trim();
   const ad = document.getElementById('addr').value.trim();
-  if(!fn||!ln){ showToast('⚠️ Please enter your full name'); return; }
+  const notes = document.getElementById('notes').value.trim();
+
+  if(!fn || !ln){ showToast('⚠️ Please enter your full name'); return; }
   if(!ph){ showToast('⚠️ Please enter your mobile number'); return; }
-  if(orderType==='delivery'&&!ad){ showToast('⚠️ Please enter your delivery address'); return; }
+  if(orderType==='delivery' && !ad){ showToast('⚠️ Please enter your delivery address'); return; }
+
   orderSeq++;
-  document.getElementById('orderNumEl').textContent = '#TSM-'+orderSeq;
+  const orderNum = '#TSM-' + orderSeq;
+
+  // Build message for Facebook Messenger
+  let msg = `🛵 New Order from Tisoy Sushi Website\n\n`;
+  msg += `Order #: ${orderNum}\n`;
+  msg += `Name: ${fn} ${ln}\n`;
+  msg += `Phone: ${ph}\n`;
+  if (orderType === 'delivery' && ad) msg += `Address: ${ad}\n`;
+  msg += `Order Type: ${orderType.toUpperCase()}\n\n`;
+  
+  cartItems().forEach(i => {
+    msg += `• ${i.name} x${i.qty} = ₱${i.price * i.qty}\n`;
+  });
+  
+  msg += `\nSubtotal: ₱${subtotal()}\n`;
+  msg += `Delivery: ₱${deliveryFee()}\n`;
+  msg += `Total: ₱${total()}\n`;
+  if (notes) msg += `\nNotes: ${notes}\n`;
+  msg += `\nPayment: ${payMethod.toUpperCase()}`;
+
+  // Open Facebook Messenger
+  const fbUrl = `https://www.facebook.com/messages/t/?text=${encodeURIComponent(msg)}`;
+  window.open(fbUrl, '_blank');
+
+  // Clear cart and show success
   cart = {};
   renderCart();
   closeModal('checkoutModal');
+  document.getElementById('orderNumEl').textContent = orderNum;
   openModal('successModal');
 }
 
@@ -1143,7 +1155,6 @@ function closeModal(id) {
   document.getElementById(id).classList.remove('open');
   document.body.style.overflow = '';
 }
-
 function saveLocation() {
   const loc = document.getElementById('locInput').value.trim();
   const area = document.getElementById('locArea').value;
