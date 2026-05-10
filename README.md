@@ -1,142 +1,83 @@
-# 🍣 MakiYa — Sushi Maki Delivery Website
+# Tisoy Sushi Maki - Online Ordering System
 
-A full-stack delivery website built with **Python Flask** + **SQLite** + **HTML/CSS/JS**.
+A beautiful, responsive, and fully functional online food ordering website for **Tisoy Sushi Maki** — built with pure HTML, CSS, and JavaScript.
 
----
+![Preview](https://via.placeholder.com/800x400?text=Tisoy+Sushi+Maki+Preview) <!-- Replace with actual screenshot later -->
+
+## ✨ Features
+
+- **Modern & Responsive Design** – Optimized for desktop and mobile
+- **Interactive Menu** with categories (Best Sellers, Maki, Nigiri, Sets, etc.)
+- **Real-time Shopping Cart** with quantity controls
+- **Multiple Order Types**: Delivery, Pick-up, Dine-in
+- **Fixed Delivery Fee** (₱60)
+- **Checkout Form** with customer details
+- **Direct Order to Facebook Messenger** – Orders are automatically sent to the business Facebook Page
+- **WhatsApp Backup** option
+- **Success Confirmation** modal
+- **Toast Notifications**
+- **Mobile-friendly** floating cart
+
+## 🚀 Live Demo
+
+[View Live Demo](https://tisoy-sushi-maki.onrender.com) <!-- Add your hosted link here -->
+
+## 📸 Screenshots
+
+*(Add screenshots here later)*
+
+## 🛠️ Technologies Used
+
+- HTML5
+- CSS3 (Custom modern design with CSS variables)
+- Vanilla JavaScript
+- Fully responsive (Mobile-first)
 
 ## 📁 Project Structure
 
-```
-makiya/
-│
-├── app.py               ← Flask backend (API + serves index.html)
-├── requirements.txt     ← Python dependencies
-├── orders.db            ← SQLite database (auto-created on first run)
-│
-└── templates/
-    └── index.html       ← Frontend delivery website
-```
-
----
-
-## ⚙️ Setup & Run
-
-### 1. Install dependencies
 ```bash
-pip install -r requirements.txt
+online-delivering-platform/
+├── index.html ← Pure HTML markup only (no CSS/JS inline)
+├── css/
+│ └── styles.css ← All styles (variables, layout, responsive)
+└── js/
+    ├── data.js ← Menu categories & all menu items
+    ├── store.js ← Store hours, open/closed status, overlay logic
+    ├── cart.js ← Cart state, add/remove/qty, cart rendering
+    ├── checkout.js ← Checkout form, payment, order placement
+    ├── admin.js ← Owner panel (open/close toggle, custom message)
+    └── app.js ← App init, nav builders, UI helpers (modals, toast, drawer)
 ```
 
-### 2. Configure your business info
-Open `templates/index.html` and update the `CFG` block near the bottom:
+## 🎯 How to Use
 
-```js
-const CFG = {
-  businessName:  "MakiYa",                 // Your business name
-  messengerUser: "YOUR_PAGE_USERNAME",     // Facebook Page username (from page URL)
-  whatsappNo:    "639XXXXXXXXX",           // Your WhatsApp number (with country code, no +)
-  deliveryFee:   50,                       // Delivery fee in PHP
-  apiBase:       "",                       // Leave empty — Flask serves everything
-};
-```
+1. **Download** or clone the repository
+2. Open `tisoytest.html` in any web browser
+3. Customize menu items, prices, and content easily in the `<script>` section
+4. Update your Facebook Page ID in the `placeOrder()` function (already set to your page)
+5. Host it on **GitHub Pages**, Netlify, Vercel, or any web host
 
-### 3. Run the server
-```bash
-python app.py
-```
+## 🔧 Customization
 
-Open your browser at → **http://127.0.0.1:5000**
+### Easy to Edit:
+- Menu items and prices (in the `menu` object)
+- Business name, contact numbers, address
+- Delivery fee (currently ₱60)
+- Facebook Page ID
+- Promo banner text
+
+## 📞 Contact Information
+
+- **Phone**: 0995 450 8647
+- **WhatsApp**: +63 991 675 8883
+- **Facebook**: [Tisoy Sushi Maki](https://www.facebook.com/profile.php?id=61556171585372)
+- **Email**: bayanileonilo@gmail.com
+- **Location**: Cityhomes Resortville, Dasmariñas, Cavite
+
+## 📄 License
+
+This project is open-source and free to use for personal or commercial purposes.
 
 ---
 
-## 🌐 API Endpoints
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| `GET`  | `/` | Serves the delivery website |
-| `POST` | `/api/order` | Save a new order to the database |
-| `GET`  | `/api/orders` | List all orders (newest first) |
-| `GET`  | `/api/orders?status=Pending` | Filter by status |
-| `GET`  | `/api/order/<id>` | Get a single order by ID |
-| `PATCH`| `/api/order/<id>/status` | Update order status |
-
-### Order Status Values
-`Pending` → `Confirmed` → `Preparing` → `Out for Delivery` → `Delivered` / `Cancelled`
-
-### Example: Submit an order (POST /api/order)
-```json
-{
-  "name":    "Juan dela Cruz",
-  "phone":   "09171234567",
-  "address": "123 Mabini St, Calamba, Laguna",
-  "payment": "GCash",
-  "notes":   "Near the blue gate",
-  "items": [
-    { "name": "Dragon Roll", "qty": 2, "price": 229 },
-    { "name": "California Maki", "qty": 1, "price": 149 }
-  ],
-  "subtotal": 607,
-  "delivery": 50,
-  "total":    657
-}
-```
-
-### Response
-```json
-{
-  "ok": true,
-  "order_id": 1,
-  "ref": "MKY-20250501-0001",
-  "message": "Order MKY-20250501-0001 saved successfully!"
-}
-```
-
----
-
-## 🔄 How It Works (Order Flow)
-
-```
-Customer fills checkout form
-        ↓
-Frontend POSTs order to /api/order
-        ↓
-Flask saves to orders.db (SQLite)
-        ↓
-Returns order reference (e.g. MKY-20250501-0001)
-        ↓
-Frontend shows "Order saved!" banner
-        ↓
-Customer clicks Messenger or WhatsApp
-        ↓
-Pre-filled message with order + ref sent to owner
-        ↓
-Owner confirms & updates status via /api/order/<id>/status
-```
-
----
-
-## 🚀 Deploying Online (Optional)
-
-To make the site accessible publicly, you can deploy to:
-
-- **Railway** (free tier): `railway up`
-- **Render** (free tier): Connect GitHub repo
-- **PythonAnywhere**: Upload files and run Flask app
-
-For production, replace SQLite with PostgreSQL and set `debug=False`.
-
----
-
-## ✏️ Customizing the Menu
-
-Edit the `MENU` array in `templates/index.html`:
-
-```js
-{ id:14, cat:"classic", emoji:"🍤", name:"Prawn Tempura Roll",
-  price:179, desc:"Crispy tempura, avocado, spicy mayo", badge:"New" },
-```
-
-Categories: `"classic"` | `"premium"` | `"baked"` | `"party"`
-
----
-
-Built with ❤️ for MakiYa · Calamba, Laguna, Philippines
+**Made with ❤️ for Tisoy Sushi Maki**
