@@ -1094,26 +1094,37 @@ function placeOrder() {
   orderSeq++;
   const orderNum = '#TSM-' + orderSeq;
 
-  // Build message for Facebook Messenger
-  let msg = `🛵 New Order from Tisoy Sushi Website\n\n`;
-  msg += `Order #: ${orderNum}\n`;
-  msg += `Name: ${fn} ${ln}\n`;
-  msg += `Phone: ${ph}\n`;
-  if (orderType === 'delivery' && ad) msg += `Address: ${ad}\n`;
-  msg += `Order Type: ${orderType.toUpperCase()}\n\n`;
+  // Refined Facebook Message
+  let msg = `🍣 *NEW ORDER - Tisoy Sushi Maki*\n\n`;
+  msg += `📌 Order Number: ${orderNum}\n`;
+  msg += `👤 Customer: ${fn} ${ln}\n`;
+  msg += `📞 Contact: ${ph}\n`;
   
-  cartItems().forEach(i => {
-    msg += `• ${i.name} x${i.qty} = ₱${i.price * i.qty}\n`;
-  });
+  if (orderType === 'delivery' && ad) {
+    msg += `📍 Delivery Address: ${ad}\n`;
+  }
   
-  msg += `\nSubtotal: ₱${subtotal()}\n`;
-  msg += `Delivery: ₱${deliveryFee()}\n`;
-  msg += `Total: ₱${total()}\n`;
-  if (notes) msg += `\nNotes: ${notes}\n`;
-  msg += `\nPayment: ${payMethod.toUpperCase()}`;
+  msg += `🚚 Order Type: ${orderType === 'delivery' ? 'Delivery' : orderType === 'pickup' ? 'Pick-up' : 'Dine-in'}\n\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `🛒 *ORDER ITEMS*\n\n`;
 
-  // Open Facebook Messenger
-  const fbUrl = `https://www.facebook.com/messages/t/?text=${encodeURIComponent(msg)}`;
+  cartItems().forEach(i => {
+    msg += `• ${i.name}\n   Qty: ${i.qty} × ₱${i.price} = ₱${i.price * i.qty}\n\n`;
+  });
+
+  msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `💰 Subtotal     : ₱${subtotal()}\n`;
+  msg += `🚚 Delivery Fee : ₱${deliveryFee()}\n`;
+  msg += `💵 *Total         : ₱${total()}*\n\n`;
+
+  if (notes) msg += `📝 Special Notes:\n${notes}\n\n`;
+
+  msg += `💳 Payment Method: ${payMethod.toUpperCase()}\n`;
+  msg += `⏰ Ordered via Website`;
+
+  // Opens directly to YOUR Facebook Page
+  const fbUrl = `https://www.facebook.com/messages/t/61556171585372?text=${encodeURIComponent(msg)}`;
+  
   window.open(fbUrl, '_blank');
 
   // Clear cart and show success
