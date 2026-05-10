@@ -1155,7 +1155,7 @@ function checkStoreStatus() {
     const oMsg   = document.getElementById('closedMsg');
     const oIcon  = document.getElementById('closedIcon');
     oIcon.textContent = ph.getHours() >= OPEN_HOUR ? '🌙' : '🌅';
-    oTitle.textContent = 'We're Closed Right Now';
+    oTitle.textContent = "We're Closed Right Now";
     oMsg.textContent   = ph.getHours() < OPEN_HOUR
       ? 'Our kitchen isn\'t ready yet! We open at 10:00 AM.'
       : 'Our kitchen has closed for the day. We\'ll be back tomorrow at 10:00 AM!';
