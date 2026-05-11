@@ -325,24 +325,25 @@
 </footer>
 
 <!-- ITEM DETAIL MODAL -->
-<div id="itemModal" class="modal">
-  <div class="modal-content">
-    <span class="modal-close" onclick="closeItemModal()">×</span>
-    
-    <div class="modal-image">
-      <img id="modalImage" src="" alt="Menu Item">
+<div class="overlay" id="itemModal" style="display: none;">
+  <div class="modal item-detail-modal">
+    <div class="modal-hd">
+      <h3>Item Details</h3>
+      <button class="modal-x" onclick="closeItemModal()">✕</button>
     </div>
-    
-    <div class="modal-body">
+    <div class="modal-bd">
+      <!-- Image -->
+      <img id="modalImage" src="" alt="" class="modal-item-img">
+
       <h2 id="modalName"></h2>
-      <p id="modalDesc"></p>
-      
-      <div id="modalVariants" class="modal-variants"></div>
-      
+      <p id="modalDesc" class="modal-desc"></p>
+
+      <!-- Variants / Price -->
+      <div id="modalVariants"></div>
       <div class="modal-price" id="modalPrice"></div>
-      
-      <button class="add-to-cart-btn" id="modalAddBtn">
-        ＋ Add to Cart
+
+      <button id="modalAddBtn" class="add-btn-large">
+        ＋ Add to Order
       </button>
     </div>
   </div>
