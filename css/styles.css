@@ -199,6 +199,7 @@ body { font-family: 'Nunito', sans-serif; background: #ffffff; color: var(--dark
 
 /* DESKTOP SIDEBAR */
 .cat-sidebar { width: 188px; flex-shrink: 0; position: sticky; top: 84px; }
+.cat-sidebar { display: none; }
 .cat-sidebar-title { font-size: 0.68rem; font-weight: 900; color: var(--gray); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; padding: 0 10px; }
 .cat-item {
   display: flex; align-items: center; gap: 10px;
@@ -215,18 +216,38 @@ body { font-family: 'Nunito', sans-serif; background: #ffffff; color: var(--dark
 
 /* Mobile category scroll */
 .mobile-cats {
-  display: none; gap: 8px; overflow-x: auto;
-  padding-bottom: 8px; margin-bottom: 20px; scrollbar-width: none; width: 100%;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+  width: 100%;
+  overflow-x: unset;
+  padding-bottom: 0;
 }
 .mobile-cats::-webkit-scrollbar { display: none; }
+.mobile-cats::-webkit-scrollbar { display: none; }
 .m-cat-btn {
-  flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 9px 12px; border-radius: 12px; border: 2px solid var(--border);
-  background: var(--white); cursor: pointer; font-family: 'Nunito', sans-serif;
-  font-weight: 700; font-size: 0.72rem; color: var(--gray); transition: all 0.2s;
+  flex-shrink: unset;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 10px;
+  border-radius: 14px;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--gray);
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
+.m-cat-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
 .m-cat-btn.active { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
-.m-cat-btn span:first-child { font-size: 1.35rem; }
+.m-cat-btn span:first-child { font-size: 2rem; }
 
 /* SECTION HEADER */
 .section-hd { margin-bottom: 20px; }
