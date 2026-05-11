@@ -694,3 +694,18 @@ footer { background: var(--dark); color: rgba(255,255,255,0.75); padding: 38px 2
 .section-hd {
   text-align: center;
 }
+
+/* Hide the left sidebar */
+.cat-sidebar {
+  display: none;
+}
+
+/* Center the menu */
+.main-wrapper {
+  justify-content: center;
+}
+
+.menu-area {
+  max-width: 860px;
+  width: 100%;
+}
