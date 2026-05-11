@@ -62,17 +62,21 @@ function buildNavs() {
 function buildSections() {
   const wrap = document.getElementById('menuSections');
   wrap.innerHTML = '';
+  
   categories.forEach(c => {
     const sec = document.createElement('div');
     sec.className = 'menu-section';
     sec.id = 'sec-' + c.id;
-    sec.innerHTML = `<div class="menu-grid">${menu[c.id].map(cardHTML).join('')}</div>`;
+    
+    const cardsHTML = menu[c.id].map(item => cardHTML(item, c.id)).join('');
+    
+    sec.innerHTML = `<div class="menu-grid">${cardsHTML}</div>`;
     wrap.appendChild(sec);
   });
 }
 
 /* ── Menu card HTML ── */
-function cardHTML(item) {
+function cardHTML(item, catId = null) {
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'tisoy2025';
 
   const tagHTML = item.tag === 'bestseller' ? `<span class="tag-best">⭐ Best Seller</span>`
@@ -96,23 +100,23 @@ function cardHTML(item) {
       <span class="card-emoji-fallback" style="display:none">${item.emoji}</span>`;
   }
 
-  // Make the whole card clickable (except admin buttons)
   const cardClick = `onclick="showItemModalById(${item.id})" style="cursor:pointer"`;
 
   let adminControls = '';
   if (isAdmin) {
     const isAvailable = item.available !== false;
+    const currentCat = catId || activeCat;
     adminControls = `
       <div class="admin-card-controls">
-        <button onclick="event.stopImmediatePropagation(); editItemInline('${item.cat || activeCat}', ${item.id});" class="admin-card-btn" title="Edit">✏️</button>
-        <button onclick="event.stopImmediatePropagation(); toggleItemVisibility('${item.cat || activeCat}', ${item.id});" class="admin-card-btn" title="Toggle Visibility">
+        <button onclick="event.stopImmediatePropagation(); editItemInline('${currentCat}', ${item.id});" class="admin-card-btn" title="Edit">✏️</button>
+        <button onclick="event.stopImmediatePropagation(); toggleItemVisibility('${currentCat}', ${item.id});" class="admin-card-btn" title="Toggle Visibility">
           ${isAvailable ? '✅' : '🚫'}
         </button>
-        <button onclick="event.stopImmediatePropagation(); deleteItemInline('${item.cat || activeCat}', ${item.id});" class="admin-card-btn danger" title="Delete">🗑️</button>
+        <button onclick="event.stopImmediatePropagation(); deleteItemInline('${currentCat}', ${item.id});" class="admin-card-btn danger" title="Delete">🗑️</button>
       </div>`;
   }
 
-  // Items with size variants
+  // Items with variants
   if (item.variants && item.variants.length) {
     const firstPrice = item.variants[0].price;
     const opts = item.variants.map((v, i) =>
