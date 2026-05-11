@@ -65,9 +65,9 @@ const menu = {
   // MAKI ROLLS – A LA CARTE
   // ─────────────────────────────────────────
   maki: [
-    { id: 5,  name: 'California Maki',                      emoji: '🌀', tag: 'bestseller', desc: 'Classic California roll.',                                         price: 159, images: ['images/FB_IMG_1778470919270.jpg', 'images/FB_IMG_1778470926877.jpg'] },
-    { id: 6,  name: 'Spicy California Maki',                emoji: '🌶️', tag: 'spicy',      desc: 'California roll with a spicy kick.',                               price: 169, images: ['images/FB_IMG_1778470923332.jpg'] },
-    { id: 7,  name: 'Veggie / Mango Maki',                  emoji: '🥭',                    desc: 'Fresh veggie or sweet mango maki roll.',                            price: 159, images: ['images/FB_IMG_1778470885530.jpg'] },
+    { id: 5,  name: 'California Maki',                      emoji: '🌀', tag: 'bestseller', desc: 'Classic California roll.',                                         price: 159, images: ['/images/FB_IMG_1778470919270.jpg', '/images/FB_IMG_1778470926877.jpg'] },
+    { id: 6,  name: 'Spicy California Maki',                emoji: '🌶️', tag: 'spicy',      desc: 'California roll with a spicy kick.',                               price: 169, images: ['/images/FB_IMG_1778470923332.jpg'] },
+    { id: 7,  name: 'Veggie / Mango Maki',                  emoji: '🥭',                    desc: 'Fresh veggie or sweet mango maki roll.',                            price: 159, images: ['/images/FB_IMG_1778470885530.jpg'] },
     { id: 8,  name: 'Vegan Mango Maki',                     emoji: '🥭',                    desc: 'Plant-based mango maki roll.',                                      price: 159, images: ['images/FB_IMG_1778470847216.jpg'] },
     { id: 9,  name: 'Kani Cheese / Veggie Mango Maki',      emoji: '🌀',                    desc: 'Kani with cheese or veggie mango combination roll (15 pcs).',       price: 259, images: [] },
     { id: 10, name: 'Veggie / Cheesey / Kani Maki',         emoji: '🌀',                    desc: 'Choice of veggie, cheesy, or kani maki roll (15 pcs).',             price: 279, images: ['images/FB_IMG_1778470930753.jpg'] },
