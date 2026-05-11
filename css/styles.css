@@ -661,3 +661,15 @@ footer { background: var(--dark); color: rgba(255,255,255,0.75); padding: 38px 2
 .hero-desc {
   text-align: center;
 }
+
+/* === FILL ORDER TOGGLE BUTTONS === */
+.order-toggle {
+  width: 100%;
+  display: flex;
+}
+
+.order-toggle .toggle-btn {
+  flex: 1;
+  text-align: center;
+  justify-content: center;
+}
