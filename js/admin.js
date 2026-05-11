@@ -81,8 +81,16 @@ function saveEditedItem() {
 
   item.name = newName;
   item.desc = document.getElementById('editDesc').value.trim();
+
   const newPrice = parseInt(document.getElementById('editPrice').value);
+  
+  // Update main price
   if (!isNaN(newPrice)) item.price = newPrice;
+
+  // Also update first variant price (important for bulk items)
+  if (item.variants && item.variants.length > 0) {
+    item.variants[0].price = newPrice;
+  }
 
   saveAdminMenu();
   buildSections();
