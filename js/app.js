@@ -272,3 +272,11 @@ function clearSearch() {
   buildSections();
   setActiveCat(activeCat);
 }
+
+function getFullImagePath(path) {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  if (path.startsWith('/images/')) return path;
+  if (path.startsWith('images/')) return '/' + path;
+  return '/images/' + path.replace(/^\/+/, '');
+}
