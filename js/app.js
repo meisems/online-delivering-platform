@@ -73,14 +73,15 @@ function buildSections() {
 
 /* ── Menu card HTML ── */
 function cardHTML(item) {
+  const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'tisoy2025';
+
   const tagHTML = item.tag === 'bestseller' ? `<span class="tag-best">⭐ Best Seller</span>`
                 : item.tag === 'new' ? `<span class="tag-new">✨ New</span>` : '';
-  
+ 
   const spicy = item.tag === 'spicy' ? `<span class="tag-spicy">🌶️ Spicy</span>` : '';
 
   // Image handling
   let imgContent = `<span class="card-emoji-fallback">${item.emoji}</span>`;
-
   if (item.images && item.images.length > 0) {
     let imgSrc = item.images[0];
     if (!imgSrc.startsWith('/images/')) {
@@ -88,15 +89,28 @@ function cardHTML(item) {
       else imgSrc = '/images/' + imgSrc.replace(/^\/+/, '');
     }
     imgContent = `
-      <img src="${imgSrc}" 
-           alt="${item.name}" 
-           loading="lazy" 
+      <img src="${imgSrc}"
+           alt="${item.name}"
+           loading="lazy"
            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
       <span class="card-emoji-fallback" style="display:none">${item.emoji}</span>`;
   }
 
-  // Make the whole card clickable
+  // Make the whole card clickable (except admin buttons)
   const cardClick = `onclick="showItemModalById(${item.id})" style="cursor:pointer"`;
+
+  let adminControls = '';
+  if (isAdmin) {
+    const isAvailable = item.available !== false;
+    adminControls = `
+      <div class="admin-card-controls">
+        <button onclick="event.stopImmediatePropagation(); editItemInline('${item.cat || activeCat}', ${item.id});" class="admin-card-btn" title="Edit">✏️</button>
+        <button onclick="event.stopImmediatePropagation(); toggleItemVisibility('${item.cat || activeCat}', ${item.id});" class="admin-card-btn" title="Toggle Visibility">
+          ${isAvailable ? '✅' : '🚫'}
+        </button>
+        <button onclick="event.stopImmediatePropagation(); deleteItemInline('${item.cat || activeCat}', ${item.id});" class="admin-card-btn danger" title="Delete">🗑️</button>
+      </div>`;
+  }
 
   // Items with size variants
   if (item.variants && item.variants.length) {
@@ -105,10 +119,13 @@ function cardHTML(item) {
       `<option value="${i}" data-price="${v.price}">${v.size}${v.note ? ' · ' + v.note : ''} — ${v.price ? '₱' + v.price : 'Contact us'}</option>`
     ).join('');
     const safeN = item.name.replace(/'/g,"\\'");
-    
+
     return `
   <div class="menu-card" ${cardClick}>
-    <div class="menu-card-img">${tagHTML}${spicy}${imgContent}</div>
+    <div class="menu-card-img">
+      ${tagHTML}${spicy}${imgContent}
+      ${adminControls}
+    </div>
     <div class="card-body">
       <h3>${item.name}</h3>
       <p>${item.desc}</p>
@@ -126,8 +143,8 @@ function cardHTML(item) {
   return `
   <div class="menu-card" ${cardClick}>
     <div class="menu-card-img">
-      ${tagHTML}${spicy}
-      ${imgContent}
+      ${tagHTML}${spicy}${imgContent}
+      ${adminControls}
     </div>
     <div class="card-body">
       <h3>${item.name}</h3>
@@ -139,6 +156,7 @@ function cardHTML(item) {
     </div>
   </div>`;
 }
+
 /* ── Variant helpers ── */
 function updateVariantPrice(itemId, sel) {
   const price = parseInt(sel.selectedOptions[0].getAttribute('data-price')) || 0;
