@@ -78,7 +78,7 @@ function cardHTML(item) {
   
   const spicy = item.tag === 'spicy' ? `<span class="tag-spicy">🌶️ Spicy</span>` : '';
 
-  // === FINAL IMAGE HANDLING ===
+  // === IMPROVED IMAGE HANDLING ===
   let imgContent = `<span class="card-emoji-fallback">${item.emoji}</span>`;
 
   if (item.images && item.images.length > 0) {
@@ -94,11 +94,11 @@ function cardHTML(item) {
       <img src="${imgSrc}" 
            alt="${item.name}" 
            loading="lazy" 
-           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
+           onerror="console.log('Image failed: ${imgSrc}'); this.style.display='none'; this.nextElementSibling.style.display='flex';" />
       <span class="card-emoji-fallback" style="display:none">${item.emoji}</span>`;
   }
 
-  // Rest of the function remains the same...
+  // Items with size variants
   if (item.variants && item.variants.length) {
     const firstPrice = item.variants[0].price;
     const opts = item.variants.map((v, i) =>
@@ -121,6 +121,7 @@ function cardHTML(item) {
   </div>`;
   }
 
+  // Single price items
   const displayPrice = item.price ? '₱' + item.price : 'Contact us';
   return `
   <div class="menu-card">
