@@ -757,3 +757,9 @@ footer { background: var(--dark); color: rgba(255,255,255,0.75); padding: 38px 2
   background: #e53e3e;
   color: #fff;
 }
+
+@media (min-width: 900px) {
+  .mobile-cats {
+    display: grid !important;
+  }
+}
