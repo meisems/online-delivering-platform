@@ -1,38 +1,36 @@
 /* ══════════════════════════════════════
-   app.js — App state, init, UI helpers
+   app.js — Fixed & Complete Version
 ══════════════════════════════════════ */
 
 /* ── Global State ── */
-let cart      = {};
+let cart = {};
 let orderType = 'delivery';
-let activeCat = 'bestsellers';
+let activeCat = 'bakedsushi';           // Fixed
 let storeOpen = true;
 
-// Make admin variables accessible across files
+// Admin globals
 window.isAdminMode = false;
 window.adminMenu = null;
 
 /* ── DOMContentLoaded ── */
 document.addEventListener('DOMContentLoaded', () => {
-  loadCart();         // ← restore saved cart & order type FIRST
+  loadCart();
   buildNavs();
   buildSections();
-  setActiveCat('bestsellers');
-  renderCart();       // ← now renders with the restored cart
+  setActiveCat(activeCat);               // Fixed
+  renderCart();
   checkStoreStatus();
   initAdmin();
 
-  // Restore active toggle button to match saved orderType
+  // Restore active toggle button
   document.querySelectorAll('.toggle-btn').forEach(btn => {
     const t = btn.getAttribute('onclick').match(/'(\w+)'/)?.[1];
     if (t === orderType) btn.classList.add('active');
     else btn.classList.remove('active');
   });
 
-  // Re-check store status every 60 seconds
   setInterval(checkStoreStatus, 60_000);
 
-  // Close modals on backdrop click
   document.querySelectorAll('.overlay').forEach(o => {
     o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); });
   });
@@ -42,9 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function buildNavs() {
   const dc = document.getElementById('desktopCats');
   const mc = document.getElementById('mobileCats');
-
   categories.forEach(c => {
-    // Desktop sidebar item
     const d = document.createElement('div');
     d.className = 'cat-item';
     d.id = 'dc-' + c.id;
@@ -52,7 +48,6 @@ function buildNavs() {
     d.onclick = () => setActiveCat(c.id);
     dc.appendChild(d);
 
-    // Mobile scroll button
     const m = document.createElement('button');
     m.className = 'm-cat-btn';
     m.id = 'mc-' + c.id;
@@ -66,8 +61,8 @@ function buildNavs() {
 function buildSections() {
   const wrap = document.getElementById('menuSections');
   wrap.innerHTML = '';
-  
-  const dataSource = (isAdminMode && adminMenu) ? adminMenu : menu;
+
+  const dataSource = (window.isAdminMode && window.adminMenu) ? window.adminMenu : menu;
 
   categories.forEach(c => {
     const sec = document.createElement('div');
@@ -88,10 +83,8 @@ function cardHTML(item, catId = null) {
 
   const tagHTML = item.tag === 'bestseller' ? `<span class="tag-best">⭐ Best Seller</span>`
                 : item.tag === 'new' ? `<span class="tag-new">✨ New</span>` : '';
- 
   const spicy = item.tag === 'spicy' ? `<span class="tag-spicy">🌶️ Spicy</span>` : '';
 
-  // Image handling
   let imgContent = `<span class="card-emoji-fallback">${item.emoji}</span>`;
   if (item.images && item.images.length > 0) {
     let imgSrc = item.images[0];
@@ -100,9 +93,7 @@ function cardHTML(item, catId = null) {
       else imgSrc = '/images/' + imgSrc.replace(/^\/+/, '');
     }
     imgContent = `
-      <img src="${imgSrc}"
-           alt="${item.name}"
-           loading="lazy"
+      <img src="${imgSrc}" alt="${item.name}" loading="lazy"
            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
       <span class="card-emoji-fallback" style="display:none">${item.emoji}</span>`;
   }
@@ -123,7 +114,6 @@ function cardHTML(item, catId = null) {
       </div>`;
   }
 
-  // Items with variants
   if (item.variants && item.variants.length) {
     const firstPrice = item.variants[0].price;
     const opts = item.variants.map((v, i) =>
@@ -133,10 +123,7 @@ function cardHTML(item, catId = null) {
 
     return `
   <div class="menu-card" ${cardClick}>
-    <div class="menu-card-img">
-      ${tagHTML}${spicy}${imgContent}
-      ${adminControls}
-    </div>
+    <div class="menu-card-img">${tagHTML}${spicy}${imgContent}${adminControls}</div>
     <div class="card-body">
       <h3>${item.name}</h3>
       <p>${item.desc}</p>
@@ -149,14 +136,10 @@ function cardHTML(item, catId = null) {
   </div>`;
   }
 
-  // Single price items
   const displayPrice = item.price ? '₱' + item.price : 'Contact us';
   return `
   <div class="menu-card" ${cardClick}>
-    <div class="menu-card-img">
-      ${tagHTML}${spicy}${imgContent}
-      ${adminControls}
-    </div>
+    <div class="menu-card-img">${tagHTML}${spicy}${imgContent}${adminControls}</div>
     <div class="card-body">
       <h3>${item.name}</h3>
       <p>${item.desc}</p>
@@ -174,13 +157,14 @@ function updateVariantPrice(itemId, sel) {
   const el = document.getElementById('price-' + itemId);
   if (el) el.textContent = price ? '₱' + price : 'Contact us';
 }
+
 function addVariantToCart(itemId, name, emoji) {
   const sel = document.getElementById('var-' + itemId);
   if (!sel) return;
-  const opt   = sel.selectedOptions[0];
+  const opt = sel.selectedOptions[0];
   const price = parseInt(opt.getAttribute('data-price')) || 0;
-  const size  = opt.text.split(' — ')[0];
-  const cartKey  = itemId + '-' + sel.selectedIndex;
+  const size = opt.text.split(' — ')[0];
+  const cartKey = itemId + '-' + sel.selectedIndex;
   const cartName = name + ' (' + size + ')';
   addToCart(cartKey, cartName, price, emoji);
 }
@@ -188,41 +172,23 @@ function addVariantToCart(itemId, name, emoji) {
 /* ── Active category ── */
 function setActiveCat(id) {
   const cat = categories.find(c => c.id === id);
-  
   if (!cat) {
-    console.error(`Category with id "${id}" not found in categories array!`);
-    return; // Prevent crash
+    console.warn(`Category "${id}" not found.`);
+    return;
   }
-
   activeCat = id;
-
-  // Update title and description
   document.getElementById('secTitle').textContent = cat.emoji + ' ' + cat.label;
-  document.getElementById('secDesc').textContent = cat.desc;
+  document.getElementById('secDesc').textContent = cat.desc || '';
 
-  // Switch visible section
   document.querySelectorAll('.menu-section').forEach(s => s.classList.remove('visible'));
   const section = document.getElementById('sec-' + id);
-  if (section) {
-    section.classList.add('visible');
-  } else {
-    console.error(`Section element "sec-${id}" not found!`);
-  }
+  if (section) section.classList.add('visible');
 
-  // Update active buttons
-  document.querySelectorAll('.cat-item, .m-cat-btn').forEach(el => {
-    el.classList.remove('active');
-  });
-
-  const dc = document.getElementById('dc-' + id);
-  const mc = document.getElementById('mc-' + id);
-  
-  if (dc) dc.classList.add('active');
-  if (mc) {
-    mc.classList.add('active');
-    mc.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  }
+  document.querySelectorAll('.cat-item, .m-cat-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('dc-' + id)?.classList.add('active');
+  document.getElementById('mc-' + id)?.classList.add('active');
 }
+
 /* ── Order type toggle ── */
 function setOrderType(t, btn) {
   orderType = t;
@@ -232,16 +198,16 @@ function setOrderType(t, btn) {
 }
 
 /* ── Drawer ── */
-function openCartDrawer()  { document.getElementById('cartDrawer').classList.add('open');    document.body.style.overflow = 'hidden'; }
+function openCartDrawer() { document.getElementById('cartDrawer').classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeCartDrawer() { document.getElementById('cartDrawer').classList.remove('open'); document.body.style.overflow = ''; }
 
 /* ── Modals ── */
-function openModal(id)  { document.getElementById(id).classList.add('open');    document.body.style.overflow = 'hidden'; }
+function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
 
 /* ── Location save ── */
 function saveLocation() {
-  const loc  = document.getElementById('locInput').value.trim();
+  const loc = document.getElementById('locInput').value.trim();
   const area = document.getElementById('locArea').value;
   const display = loc || area || 'My Location';
   const locEl = document.getElementById('currentLoc');
@@ -266,25 +232,20 @@ function searchMenu(query) {
   const clearBtn = document.getElementById('searchClear');
   const mobileCats = document.getElementById('mobileCats');
   const secHd = document.querySelector('.section-hd');
-
   clearBtn.classList.toggle('hidden', q === '');
-
   if (!q) {
     clearSearch();
     return;
   }
-
-  // Hide category nav and section header while searching
   mobileCats.style.display = 'none';
   secHd.style.display = 'none';
 
-  // Gather all matching items across every category
   const results = [];
   categories.forEach(cat => {
-    menu[cat.id].forEach(item => {
+    (menu[cat.id] || []).forEach(item => {
       if (
         item.name.toLowerCase().includes(q) ||
-        item.desc.toLowerCase().includes(q) ||
+        (item.desc && item.desc.toLowerCase().includes(q)) ||
         cat.label.toLowerCase().includes(q)
       ) {
         results.push({ ...item, catLabel: cat.label });
@@ -292,14 +253,12 @@ function searchMenu(query) {
     });
   });
 
-  // Render results into menuSections
   const wrap = document.getElementById('menuSections');
   if (results.length === 0) {
     wrap.innerHTML = `
       <div class="no-results">
         <div class="nr-icon">🍣</div>
         <p>No items found for "<strong>${query}</strong>"</p>
-        <p style="font-size:0.8rem;margin-top:6px;">Try searching "maki", "salmon", or "baked"</p>
       </div>`;
   } else {
     wrap.innerHTML = `
@@ -328,18 +287,14 @@ function getFullImagePath(path) {
 
 /* ── Item Detail Modal ── */
 let currentItem = null;
-
 function showItemModal(item) {
   currentItem = item;
-  
-  // Set image
   const imgEl = document.getElementById('modalImage');
   if (item.images && item.images.length > 0) {
     imgEl.src = getFullImagePath(item.images[0]);
   } else {
     imgEl.src = '';
   }
-
   document.getElementById('modalName').textContent = item.name;
   document.getElementById('modalDesc').textContent = item.desc || '';
 
@@ -359,7 +314,6 @@ function showItemModal(item) {
     priceEl.textContent = item.price ? `₱${item.price}` : 'Contact us';
   }
 
-  // Add to cart button
   const addBtn = document.getElementById('modalAddBtn');
   addBtn.onclick = () => {
     if (item.variants && item.variants.length) {
@@ -374,16 +328,13 @@ function showItemModal(item) {
 }
 
 function showItemModalById(id) {
-  // Search in all categories
+  const dataSource = (window.isAdminMode && window.adminMenu) ? window.adminMenu : menu;
   let item = null;
-  Object.values(menu).forEach(cat => {
+  Object.values(dataSource).forEach(cat => {
     const found = cat.find(i => i.id === id);
     if (found) item = found;
   });
-
-  if (item) {
-    showItemModal(item);
-  }
+  if (item) showItemModal(item);
 }
 
 function updateModalPrice() {
