@@ -20,16 +20,15 @@ function initAdmin() {
   buildSections();
 }
 
-// ==================== STORE STATUS (Original Functions) ====================
-
+// ==================== STORE STATUS ====================
 function toggleAdminPanel() {
   const panel = document.getElementById('adminPanel');
   panel.classList.toggle('open');
 }
 
 function toggleOwnerClosed() {
-  const tog  = document.getElementById('adminToggle');
-  const dot  = document.getElementById('adminDot');
+  const tog = document.getElementById('adminToggle');
+  const dot = document.getElementById('adminDot');
   const area = document.getElementById('adminMsgArea');
   
   const isOn = tog.classList.toggle('on');
@@ -66,7 +65,6 @@ function editItemInline(catId, itemId) {
   const item = getAdminItem(catId, itemId);
   if (!item) return alert("Item not found");
 
-  // Fill the form
   document.getElementById('editCatId').value = catId;
   document.getElementById('editItemId').value = itemId;
   document.getElementById('editName').value = item.name || '';
@@ -81,9 +79,18 @@ function saveEditedItem() {
   const itemId = parseInt(document.getElementById('editItemId').value);
   const item = getAdminItem(catId, itemId);
 
-  if (!item) return;
+  if (!item) {
+    alert("Error: Item not found");
+    return;
+  }
 
-  item.name = document.getElementById('editName').value.trim();
+  const newName = document.getElementById('editName').value.trim();
+  if (!newName) {
+    alert("Item name cannot be empty!");
+    return;
+  }
+
+  item.name = newName;
   item.desc = document.getElementById('editDesc').value.trim();
   
   const newPrice = parseInt(document.getElementById('editPrice').value);
@@ -92,19 +99,41 @@ function saveEditedItem() {
   saveAdminMenu();
   buildSections();
   closeAdminEditModal();
-  showToast("✅ Item updated successfully");
+  showToast("✅ Changes saved successfully!");
 }
 
 function closeAdminEditModal() {
   document.getElementById('adminEditModal').style.display = 'none';
 }
 
-// Make new functions global
+function toggleItemVisibility(catId, itemId) {
+  const item = getAdminItem(catId, itemId);
+  if (!item) return;
+
+  item.available = item.available === false ? true : false;
+  saveAdminMenu();
+  buildSections();
+}
+
+function deleteItemInline(catId, itemId) {
+  if (!confirm("Delete this item permanently?")) return;
+
+  if (adminMenu[catId]) {
+    adminMenu[catId] = adminMenu[catId].filter(item => item.id !== itemId);
+    saveAdminMenu();
+    buildSections();
+    showToast("🗑️ Item deleted");
+  }
+}
+
+function saveAdminMenu() {
+  localStorage.setItem('tisoy_menu', JSON.stringify(adminMenu));
+}
+
+// ==================== MAKE ALL FUNCTIONS GLOBAL ====================
+window.editItemInline = editItemInline;
 window.saveEditedItem = saveEditedItem;
 window.closeAdminEditModal = closeAdminEditModal;
-
-// Make all functions globally accessible
-window.editItemInline = editItemInline;
 window.toggleItemVisibility = toggleItemVisibility;
 window.deleteItemInline = deleteItemInline;
 window.toggleAdminPanel = toggleAdminPanel;
