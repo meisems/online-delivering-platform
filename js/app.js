@@ -297,3 +297,61 @@ function getFullImagePath(path) {
   if (path.startsWith('images/')) return '/' + path;
   return '/images/' + path.replace(/^\/+/, '');
 }
+
+/* ── Item Detail Modal ── */
+let currentItem = null;
+
+function showItemModal(item) {
+  currentItem = item;
+  
+  // Set image
+  const imgEl = document.getElementById('modalImage');
+  if (item.images && item.images.length > 0) {
+    imgEl.src = getFullImagePath(item.images[0]);
+  } else {
+    imgEl.src = '';
+  }
+
+  document.getElementById('modalName').textContent = item.name;
+  document.getElementById('modalDesc').textContent = item.desc || '';
+
+  const variantsContainer = document.getElementById('modalVariants');
+  const priceEl = document.getElementById('modalPrice');
+
+  if (item.variants && item.variants.length > 0) {
+    let html = `<select id="modalVariantSelect" onchange="updateModalPrice()">`;
+    item.variants.forEach((v, i) => {
+      html += `<option value="${i}" data-price="${v.price}">${v.size} — ₱${v.price} ${v.note ? '· ' + v.note : ''}</option>`;
+    });
+    html += `</select>`;
+    variantsContainer.innerHTML = html;
+    updateModalPrice();
+  } else {
+    variantsContainer.innerHTML = '';
+    priceEl.textContent = item.price ? `₱${item.price}` : 'Contact us';
+  }
+
+  // Add to cart button
+  const addBtn = document.getElementById('modalAddBtn');
+  addBtn.onclick = () => {
+    if (item.variants && item.variants.length) {
+      addVariantToCart(item.id, item.name, item.emoji);
+    } else {
+      addToCart(item.id, item.name, item.price, item.emoji);
+    }
+    closeItemModal();
+  };
+
+  document.getElementById('itemModal').style.display = 'flex';
+}
+
+function updateModalPrice() {
+  const sel = document.getElementById('modalVariantSelect');
+  if (!sel) return;
+  const price = sel.selectedOptions[0].getAttribute('data-price');
+  document.getElementById('modalPrice').textContent = `₱${price}`;
+}
+
+function closeItemModal() {
+  document.getElementById('itemModal').style.display = 'none';
+}
