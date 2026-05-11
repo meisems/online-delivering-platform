@@ -10,13 +10,13 @@ function initAdmin() {
   if (params.get('admin') !== 'tisoy2025') return;
 
   isAdminMode = true;
+  window.isAdminMode = true;
   document.getElementById('adminFab').classList.add('visible');
 
-  // Load saved menu or use original
   const saved = localStorage.getItem('tisoy_menu');
   adminMenu = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(menu));
+  window.adminMenu = adminMenu;
 
-  // Rebuild menu with admin controls
   buildSections();
 }
 
@@ -30,7 +30,6 @@ function toggleOwnerClosed() {
   const tog = document.getElementById('adminToggle');
   const dot = document.getElementById('adminDot');
   const area = document.getElementById('adminMsgArea');
-  
   const isOn = tog.classList.toggle('on');
   dot.classList.toggle('off', isOn);
   area.classList.toggle('show', isOn);
@@ -41,10 +40,7 @@ function applyOwnerStatus() {
   const msg = document.getElementById('adminMsgInput').value.trim();
 
   if (isClosed) {
-    localStorage.setItem('tisoy_owner_status', JSON.stringify({
-      closed: true,
-      message: msg || 'We are temporarily unavailable.'
-    }));
+    localStorage.setItem('tisoy_owner_status', JSON.stringify({ closed: true, message: msg || 'We are temporarily unavailable.' }));
   } else {
     localStorage.removeItem('tisoy_owner_status');
   }
@@ -54,8 +50,7 @@ function applyOwnerStatus() {
   showToast(isClosed ? '🔴 Store is now CLOSED' : '✅ Store is now OPEN');
 }
 
-// ==================== INLINE ADMIN EDITING ====================
-
+// ==================== ADMIN EDITING ====================
 function getAdminItem(catId, itemId) {
   if (!adminMenu || !adminMenu[catId]) return null;
   return adminMenu[catId].find(item => item.id === itemId);
@@ -79,20 +74,13 @@ function saveEditedItem() {
   const itemId = parseInt(document.getElementById('editItemId').value);
   const item = getAdminItem(catId, itemId);
 
-  if (!item) {
-    alert("Error: Item not found");
-    return;
-  }
+  if (!item) return alert("Item not found");
 
   const newName = document.getElementById('editName').value.trim();
-  if (!newName) {
-    alert("Item name cannot be empty!");
-    return;
-  }
+  if (!newName) return alert("Item name cannot be empty!");
 
   item.name = newName;
   item.desc = document.getElementById('editDesc').value.trim();
-  
   const newPrice = parseInt(document.getElementById('editPrice').value);
   if (!isNaN(newPrice)) item.price = newPrice;
 
@@ -109,7 +97,6 @@ function closeAdminEditModal() {
 function toggleItemVisibility(catId, itemId) {
   const item = getAdminItem(catId, itemId);
   if (!item) return;
-
   item.available = item.available === false ? true : false;
   saveAdminMenu();
   buildSections();
@@ -117,7 +104,6 @@ function toggleItemVisibility(catId, itemId) {
 
 function deleteItemInline(catId, itemId) {
   if (!confirm("Delete this item permanently?")) return;
-
   if (adminMenu[catId]) {
     adminMenu[catId] = adminMenu[catId].filter(item => item.id !== itemId);
     saveAdminMenu();
@@ -130,7 +116,7 @@ function saveAdminMenu() {
   localStorage.setItem('tisoy_menu', JSON.stringify(adminMenu));
 }
 
-// ==================== MAKE ALL FUNCTIONS GLOBAL ====================
+// Global functions
 window.editItemInline = editItemInline;
 window.saveEditedItem = saveEditedItem;
 window.closeAdminEditModal = closeAdminEditModal;
