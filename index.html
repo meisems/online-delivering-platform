@@ -348,6 +348,40 @@
     </div>
   </div>
 </div>
+
+<!-- ADMIN EDIT MODAL -->
+<div class="overlay" id="adminEditModal" style="display: none;">
+  <div class="modal" style="max-width: 520px;">
+    <div class="modal-hd">
+      <h3>✏️ Edit Item</h3>
+      <button class="modal-x" onclick="closeAdminEditModal()">✕</button>
+    </div>
+    <div class="modal-bd">
+      <input type="hidden" id="editCatId">
+      <input type="hidden" id="editItemId">
+      
+      <div class="fg">
+        <label>Item Name *</label>
+        <input id="editName" type="text" placeholder="Item Name">
+      </div>
+      
+      <div class="fg">
+        <label>Description</label>
+        <textarea id="editDesc" rows="3" placeholder="Short description..."></textarea>
+      </div>
+      
+      <div class="fg">
+        <label>Price (₱)</label>
+        <input id="editPrice" type="number" placeholder="299">
+      </div>
+      
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeAdminEditModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveEditedItem()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
   
 <!-- ═══ SCRIPTS (load order matters) ═══ -->
 <script src="js/data.js"></script>
