@@ -117,6 +117,16 @@
 
   <!-- MENU AREA -->
   <main class="menu-area">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        id="menuSearch" 
+        class="search-input" 
+        placeholder="Search sushi, maki, rolls..."
+        oninput="searchMenu(this.value)"/>
+      <button class="search-clear hidden" id="searchClear" onclick="clearSearch()">✕</button>
+    </div>
     <div class="mobile-cats" id="mobileCats"></div>
     <div class="section-hd">
       <h2 id="secTitle">🔥 Best Sellers</h2>
