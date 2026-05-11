@@ -66,45 +66,42 @@ function editItemInline(catId, itemId) {
   const item = getAdminItem(catId, itemId);
   if (!item) return alert("Item not found");
 
-  const newName = prompt("📝 Item Name:", item.name);
-  if (newName === null) return;
-  item.name = newName;
+  // Fill the form
+  document.getElementById('editCatId').value = catId;
+  document.getElementById('editItemId').value = itemId;
+  document.getElementById('editName').value = item.name || '';
+  document.getElementById('editDesc').value = item.desc || '';
+  document.getElementById('editPrice').value = item.price || '';
 
-  item.desc = prompt("📝 Description:", item.desc || "") || item.desc;
+  document.getElementById('adminEditModal').style.display = 'flex';
+}
 
-  if (item.price !== undefined) {
-    const newPrice = prompt("💰 Price:", item.price);
-    if (newPrice !== null) item.price = parseInt(newPrice) || item.price;
-  }
+function saveEditedItem() {
+  const catId = document.getElementById('editCatId').value;
+  const itemId = parseInt(document.getElementById('editItemId').value);
+  const item = getAdminItem(catId, itemId);
+
+  if (!item) return;
+
+  item.name = document.getElementById('editName').value.trim();
+  item.desc = document.getElementById('editDesc').value.trim();
+  
+  const newPrice = parseInt(document.getElementById('editPrice').value);
+  if (!isNaN(newPrice)) item.price = newPrice;
 
   saveAdminMenu();
   buildSections();
+  closeAdminEditModal();
   showToast("✅ Item updated successfully");
 }
 
-function toggleItemVisibility(catId, itemId) {
-  const item = getAdminItem(catId, itemId);
-  if (!item) return;
-
-  item.available = item.available === false ? true : false;
-  saveAdminMenu();
-  buildSections();
+function closeAdminEditModal() {
+  document.getElementById('adminEditModal').style.display = 'none';
 }
 
-function deleteItemInline(catId, itemId) {
-  if (!confirm("🗑️ Delete this item permanently?")) return;
-
-  if (adminMenu[catId]) {
-    adminMenu[catId] = adminMenu[catId].filter(item => item.id !== itemId);
-    saveAdminMenu();
-    buildSections();
-    showToast("🗑️ Item deleted");
-  }
-}
-
-function saveAdminMenu() {
-  localStorage.setItem('tisoy_menu', JSON.stringify(adminMenu));
-}
+// Make new functions global
+window.saveEditedItem = saveEditedItem;
+window.closeAdminEditModal = closeAdminEditModal;
 
 // Make all functions globally accessible
 window.editItemInline = editItemInline;
