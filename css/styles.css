@@ -953,3 +953,45 @@ footer { background: var(--dark); color: rgba(255,255,255,0.75); padding: 38px 2
   background: #ff4757;
   color: white;
 }
+
+/* Admin Edit Modal */
+#adminEditModal .modal-bd {
+  padding: 24px;
+}
+
+#adminEditModal input,
+#adminEditModal textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-secondary {
+  flex: 1;
+  padding: 14px;
+  background: #eee;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  flex: 1;
+  padding: 14px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
