@@ -10,12 +10,20 @@ let storeOpen = true;
 
 /* ── DOMContentLoaded ── */
 document.addEventListener('DOMContentLoaded', () => {
+  loadCart();         // ← restore saved cart & order type FIRST
   buildNavs();
   buildSections();
   setActiveCat('bestsellers');
-  renderCart();
+  renderCart();       // ← now renders with the restored cart
   checkStoreStatus();
   initAdmin();
+
+  // Restore active toggle button to match saved orderType
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    const t = btn.getAttribute('onclick').match(/'(\w+)'/)?.[1];
+    if (t === orderType) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
 
   // Re-check store status every 60 seconds
   setInterval(checkStoreStatus, 60_000);
