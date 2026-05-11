@@ -63,12 +63,15 @@ function buildSections() {
   const wrap = document.getElementById('menuSections');
   wrap.innerHTML = '';
   
+  const dataSource = (isAdminMode && adminMenu) ? adminMenu : menu;
+
   categories.forEach(c => {
     const sec = document.createElement('div');
     sec.className = 'menu-section';
     sec.id = 'sec-' + c.id;
     
-    const cardsHTML = menu[c.id].map(item => cardHTML(item, c.id)).join('');
+    const items = dataSource[c.id] || [];
+    const cardsHTML = items.map(item => cardHTML(item, c.id)).join('');
     
     sec.innerHTML = `<div class="menu-grid">${cardsHTML}</div>`;
     wrap.appendChild(sec);
