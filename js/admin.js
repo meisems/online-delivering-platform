@@ -66,12 +66,45 @@ function editItemInline(catId, itemId) {
   const item = getAdminItem(catId, itemId);
   if (!item) return alert("Item not found");
 
-  document.getElementById('editCatId').value = catId;
-  document.getElementById('editItemId').value = itemId;
-  document.getElementById('editName').value = item.name || '';
-  document.getElementById('editDesc').value = item.desc || '';
-  document.getElementById('editPrice').value = item.price || '';
+  let html = `
+    <input type="hidden" id="editCatId" value="${catId}">
+    <input type="hidden" id="editItemId" value="${itemId}">
+    
+    <div class="fg">
+      <label>Item Name *</label>
+      <input id="editName" type="text" value="${(item.name || '').replace(/"/g, '&quot;')}">
+    </div>
+    <div class="fg">
+      <label>Description</label>
+      <textarea id="editDesc" rows="3">${(item.desc || '').replace(/</g, '&lt;')}</textarea>
+    </div>`;
 
+  if (!item.variants || item.variants.length === 0) {
+    // Simple item (no variants)
+    html += `
+      <div class="fg">
+        <label>Price (₱)</label>
+        <input id="editPrice" type="number" value="${item.price || ''}">
+      </div>`;
+  } else {
+    // Item with variants (Small, Medium, Large, etc.)
+    html += `<h4 style="margin: 20px 0 12px; color: var(--primary);">Price per Size</h4>`;
+    item.variants.forEach((v, i) => {
+      html += `
+        <div class="fg">
+          <label>${v.size} ${v.note ? `(${v.note})` : ''}</label>
+          <input type="number" class="variant-price-input" data-index="${i}" value="${v.price || ''}">
+        </div>`;
+    });
+  }
+
+  html += `
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeAdminEditModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveEditedItem()">Save Changes</button>
+    </div>`;
+
+  document.getElementById('editModalBody').innerHTML = html;
   document.getElementById('adminEditModal').style.display = 'flex';
 }
 
@@ -82,22 +115,22 @@ function saveEditedItem() {
 
   if (!item) return alert("Item not found");
 
-  const newName = document.getElementById('editName').value.trim();
-  if (!newName) return alert("Item name cannot be empty!");
-
-  item.name = newName;
+  item.name = document.getElementById('editName').value.trim();
   item.desc = document.getElementById('editDesc').value.trim();
 
-  const newPrice = parseInt(document.getElementById('editPrice').value);
-  if (!isNaN(newPrice)) {
-    item.price = newPrice;
-
-    // Critical fix for items with variants (Bulk items)
-    if (item.variants && item.variants.length > 0) {
-      item.variants.forEach(variant => {
-        variant.price = newPrice;
-      });
-    }
+  if (!item.variants || item.variants.length === 0) {
+    // Single price item
+    const price = parseInt(document.getElementById('editPrice').value);
+    if (!isNaN(price)) item.price = price;
+  } else {
+    // Multiple variants
+    document.querySelectorAll('.variant-price-input').forEach(input => {
+      const index = parseInt(input.getAttribute('data-index'));
+      const price = parseInt(input.value);
+      if (!isNaN(price) && item.variants[index]) {
+        item.variants[index].price = price;
+      }
+    });
   }
 
   saveAdminMenu();
