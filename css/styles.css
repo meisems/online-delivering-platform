@@ -736,3 +736,24 @@ footer { background: var(--dark); color: rgba(255,255,255,0.75); padding: 38px 2
   align-items: center;
   justify-content: center;
 }
+
+/* ── Clear Cart Button ── */
+.clear-cart-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  background: none;
+  border: 1.5px solid #e53e3e;
+  color: #e53e3e;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  font-family: inherit;
+}
+
+.clear-cart-btn:hover {
+  background: #e53e3e;
+  color: #fff;
+}
