@@ -142,24 +142,42 @@ function addVariantToCart(itemId, name, emoji) {
 
 /* ── Active category ── */
 function setActiveCat(id) {
-  activeCat = id;
   const cat = categories.find(c => c.id === id);
+  
+  if (!cat) {
+    console.error(`Category with id "${id}" not found in categories array!`);
+    return; // Prevent crash
+  }
 
+  activeCat = id;
+
+  // Update title and description
   document.getElementById('secTitle').textContent = cat.emoji + ' ' + cat.label;
-  document.getElementById('secDesc').textContent  = cat.desc;
+  document.getElementById('secDesc').textContent = cat.desc;
 
+  // Switch visible section
   document.querySelectorAll('.menu-section').forEach(s => s.classList.remove('visible'));
-  document.getElementById('sec-' + id).classList.add('visible');
+  const section = document.getElementById('sec-' + id);
+  if (section) {
+    section.classList.add('visible');
+  } else {
+    console.error(`Section element "sec-${id}" not found!`);
+  }
 
-  document.querySelectorAll('.cat-item').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.m-cat-btn').forEach(el => el.classList.remove('active'));
+  // Update active buttons
+  document.querySelectorAll('.cat-item, .m-cat-btn').forEach(el => {
+    el.classList.remove('active');
+  });
 
   const dc = document.getElementById('dc-' + id);
   const mc = document.getElementById('mc-' + id);
+  
   if (dc) dc.classList.add('active');
-  if (mc) { mc.classList.add('active'); mc.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
+  if (mc) {
+    mc.classList.add('active');
+    mc.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
 }
-
 /* ── Order type toggle ── */
 function setOrderType(t, btn) {
   orderType = t;
