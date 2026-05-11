@@ -995,3 +995,64 @@ footer { background: var(--dark); color: rgba(255,255,255,0.75); padding: 38px 2
   font-weight: 700;
   cursor: pointer;
 }
+
+/* ===================== ADMIN EDIT MODAL ===================== */
+.admin-edit-modal {
+  max-width: 560px;
+  width: 92%;
+}
+
+#editModalBody {
+  padding: 24px;
+}
+
+#editModalBody .fg {
+  margin-bottom: 18px;
+}
+
+#editModalBody label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #444;
+}
+
+#editModalBody input,
+#editModalBody textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+#editModalBody input:focus,
+#editModalBody textarea:focus {
+  border-color: #ff4d4d;
+  outline: none;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.btn-secondary, .btn-primary {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #f1f1f1;
+  color: #333;
+}
+
+.btn-primary {
+  background: #ff4d4d;
+  color: white;
+}
