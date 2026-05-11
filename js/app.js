@@ -124,7 +124,7 @@ function cardHTML(item) {
   // Single price items
   const displayPrice = item.price ? '₱' + item.price : 'Contact us';
   return `
-  <div class="menu-card">
+  <div class="menu-card" onclick="showItemModal(menu['${activeCat || 'bakedsushi'}'].find(i => i.id === ${item.id}))" style="cursor:pointer">
     <div class="menu-card-img">
       ${tagHTML}${spicy}
       ${imgContent}
