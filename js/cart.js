@@ -23,7 +23,7 @@ function loadCart() {
 /* ── Helpers ── */
 const cartItems   = () => Object.values(cart);
 const cartCount   = () => cartItems().reduce((a, i) => a + i.qty, 0);
-const subtotal    = () => cartItems().reduce((a, i) => a + i.price * i.qty, 0);
+const subtotal    = () => cartItems().reduce((a, i) => a + (Number(i.price) || 0) * i.qty, 0); // ✅ NaN fix
 const total       = () => subtotal(); // delivery fee is via Lalamove (TBD)
 
 /* ── Mutations ── */
@@ -104,12 +104,14 @@ function renderCart() {
 }
 
 function cartItemHTML(item) {
+  const price    = Number(item.price) || 0; // ✅ NaN fix
+  const rowTotal = price * item.qty;
   return `
   <div class="cart-item">
     <div class="ci-emoji">${item.emoji}</div>
     <div class="ci-info">
       <h4>${item.name}</h4>
-      <div class="ci-price">₱${item.price} each</div>
+      <div class="ci-price">₱${price} each</div>
       <div class="qty-ctrl">
         <button class="qty-btn" onclick="updateQty(${item.id},-1)">−</button>
         <span class="qty-num">${item.qty}</span>
@@ -117,7 +119,7 @@ function cartItemHTML(item) {
         <button class="rm-btn" onclick="removeItem(${item.id})">🗑️</button>
       </div>
     </div>
-    <div class="ci-total">₱${item.price * item.qty}</div>
+    <div class="ci-total">₱${rowTotal}</div>
   </div>`;
 }
 
@@ -137,7 +139,10 @@ function buildWAMsg() {
   const items = cartItems();
   if (!items.length) return 'https://wa.me/639916758883';
   let msg = 'Hi Tisoy Sushi Maki! 🍣 I would like to order:\n\n';
-  items.forEach(i => msg += `• ${i.name} x${i.qty} — ₱${i.price * i.qty}\n`);
+  items.forEach(i => {
+    const price = Number(i.price) || 0; // ✅ NaN fix
+    msg += `• ${i.name} x${i.qty} — ₱${price * i.qty}\n`;
+  });
   msg += `\n*Items Total: ₱${total()}*\n*Order Type: ${orderType}*`;
   return 'https://wa.me/639916758883?text=' + encodeURIComponent(msg);
 }
