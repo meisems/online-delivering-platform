@@ -128,7 +128,7 @@ function saveEditedItem() {
   item.name = document.getElementById('editName').value.trim();
   item.desc = document.getElementById('editDesc').value.trim();
 
-  // Update Image
+  // Update Image URL
   const newImageUrl = document.getElementById('editImageUrl').value.trim();
   if (newImageUrl) {
     item.images = [newImageUrl];
@@ -153,6 +153,7 @@ function saveEditedItem() {
   closeAdminEditModal();
   showToast("✅ Changes saved successfully!");
 }
+
 function closeAdminEditModal() {
   document.getElementById('adminEditModal').style.display = 'none';
 }
