@@ -82,6 +82,30 @@ function cardHTML(item) {
        <span class="card-emoji-fallback" style="display:none">${item.emoji}</span>`
     : `<span class="card-emoji-fallback">${item.emoji}</span>`;
 
+  // Items with size variants
+  if (item.variants && item.variants.length) {
+    const firstPrice = item.variants[0].price;
+    const opts = item.variants.map((v, i) =>
+      `<option value="${i}" data-price="${v.price}">${v.size}${v.note ? ' · ' + v.note : ''} — ${v.price ? '₱' + v.price : 'Contact us'}</option>`
+    ).join('');
+    const safeN = item.name.replace(/'/g,"\\'");
+    return `
+  <div class="menu-card">
+    <div class="menu-card-img">${tagHTML}${spicy}${imgContent}</div>
+    <div class="card-body">
+      <h3>${item.name}</h3>
+      <p>${item.desc}</p>
+      <select class="variant-select" id="var-${item.id}" onchange="updateVariantPrice(${item.id},this)">${opts}</select>
+      <div class="card-foot">
+        <span class="item-price" id="price-${item.id}">${firstPrice ? '₱' + firstPrice : 'Contact us'}</span>
+        <button class="add-btn" onclick="addVariantToCart(${item.id},'${safeN}','${item.emoji}')">＋ Add</button>
+      </div>
+    </div>
+  </div>`;
+  }
+
+  // Items with a single flat price
+  const displayPrice = item.price ? '₱' + item.price : 'Contact us';
   return `
   <div class="menu-card">
     <div class="menu-card-img">
@@ -92,11 +116,28 @@ function cardHTML(item) {
       <h3>${item.name}</h3>
       <p>${item.desc}</p>
       <div class="card-foot">
-        <span class="item-price">₱${item.price}</span>
+        <span class="item-price">${displayPrice}</span>
         <button class="add-btn" onclick="addToCart(${item.id},'${item.name.replace(/'/g,"\\'")}',${item.price},'${item.emoji}')">＋ Add</button>
       </div>
     </div>
   </div>`;
+}
+
+/* ── Variant helpers ── */
+function updateVariantPrice(itemId, sel) {
+  const price = parseInt(sel.selectedOptions[0].getAttribute('data-price')) || 0;
+  const el = document.getElementById('price-' + itemId);
+  if (el) el.textContent = price ? '₱' + price : 'Contact us';
+}
+function addVariantToCart(itemId, name, emoji) {
+  const sel = document.getElementById('var-' + itemId);
+  if (!sel) return;
+  const opt   = sel.selectedOptions[0];
+  const price = parseInt(opt.getAttribute('data-price')) || 0;
+  const size  = opt.text.split(' — ')[0];
+  const cartKey  = itemId + '-' + sel.selectedIndex;
+  const cartName = name + ' (' + size + ')';
+  addToCart(cartKey, cartName, price, emoji);
 }
 
 /* ── Active category ── */
