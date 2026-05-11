@@ -8,6 +8,10 @@ let orderType = 'delivery';
 let activeCat = 'bestsellers';
 let storeOpen = true;
 
+// Make admin variables accessible across files
+window.isAdminMode = false;
+window.adminMenu = null;
+
 /* ── DOMContentLoaded ── */
 document.addEventListener('DOMContentLoaded', () => {
   loadCart();         // ← restore saved cart & order type FIRST
@@ -300,7 +304,7 @@ function searchMenu(query) {
   } else {
     wrap.innerHTML = `
       <div class="search-results-hd">Showing <span>${results.length}</span> result${results.length > 1 ? 's' : ''} for "<span>${query}</span>"</div>
-      <div class="menu-grid">${results.map(cardHTML).join('')}</div>`;
+      <div class="menu-grid">${results.map(item => cardHTML(item, item.cat || activeCat)).join('')}</div>`;
   }
 }
 
