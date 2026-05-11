@@ -918,3 +918,33 @@ footer { background: var(--dark); color: rgba(255,255,255,0.75); padding: 38px 2
 .small-btn.green { background: #4caf50; color: white; }
 .small-btn.red { background: #f44336; color: white; }
 .small-btn.danger { background: #e74c3c; color: white; }
+
+/* Admin Inline Controls */
+.admin-card-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  opacity: 0.9;
+  z-index: 10;
+}
+
+.admin-card-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-card-btn.danger {
+  background: #ff4d4d;
+  color: white;
+}
