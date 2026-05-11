@@ -700,16 +700,6 @@ footer { background: var(--dark); color: rgba(255,255,255,0.75); padding: 38px 2
   display: none;
 }
 
-/* Center the menu */
-.main-wrapper {
-  justify-content: center;
-}
-
-.menu-area {
-  max-width: 860px;
-  width: 100%;
-}
-
 /* === MENU CARD PHOTOS === */
 .menu-card-img {
   position: relative;
