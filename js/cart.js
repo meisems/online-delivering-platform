@@ -53,6 +53,14 @@ function removeItem(id) {
   renderCart();
 }
 
+function clearCart() {
+  if (!cartCount()) return;
+  if (!confirm('Remove all items from your cart?')) return;
+  cart = {};
+  renderCart();
+  showToast('🗑️ Cart cleared.');
+}
+
 /* ── Render ── */
 function renderCart() {
   const items = cartItems();
@@ -120,6 +128,7 @@ function cartSumHTML(sub, tot) {
     <div class="sum-row"><span>Delivery Fee</span><span style="color:#e67e00;font-weight:800;">Via Lalamove</span></div>
     <div class="sum-row total"><span>Items Total</span><span>₱${tot}</span></div>
     <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout →</button>
+    <button class="clear-cart-btn" onclick="clearCart()">🗑️ Clear Cart</button>
     <p class="cart-note">Delivery fee via Lalamove · Est. 30–60 min</p>
   </div>`;
 }
