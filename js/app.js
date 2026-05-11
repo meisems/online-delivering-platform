@@ -137,11 +137,11 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 
 /* ── Location save ── */
 function saveLocation() {
-  const loc     = document.getElementById('locInput').value.trim();
-  const area    = document.getElementById('locArea').value;
+  const loc  = document.getElementById('locInput').value.trim();
+  const area = document.getElementById('locArea').value;
   const display = loc || area || 'My Location';
-  document.getElementById('currentLoc').textContent =
-    display.length > 22 ? display.slice(0, 22) + '...' : display;
+  const locEl = document.getElementById('currentLoc');
+  if (locEl) locEl.textContent = display.length > 22 ? display.slice(0, 22) + '...' : display;
   closeModal('locationModal');
   showToast('📍 Location saved!');
 }
