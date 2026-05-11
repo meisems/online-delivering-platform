@@ -1,9 +1,9 @@
 /* ══════════════════════════════════════
-   admin.js — Enhanced Owner Panel
-   Edit / Delete / Toggle Items
+   admin.js — Owner Panel (Fixed + Enhanced)
+   Store Status + Edit/Delete Items
 ══════════════════════════════════════ */
 
-let adminMenu = null; // working copy
+let adminMenu = null;
 
 function initAdmin() {
   const params = new URLSearchParams(window.location.search);
@@ -11,26 +11,51 @@ function initAdmin() {
 
   document.getElementById('adminFab').classList.add('visible');
 
-  // Load saved menu or use original
-  const saved = localStorage.getItem('tisoy_menu');
-  adminMenu = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(menu));
+  // Load saved menu or use default
+  const savedMenu = localStorage.getItem('tisoy_menu');
+  adminMenu = savedMenu ? JSON.parse(savedMenu) : JSON.parse(JSON.stringify(menu));
 
-  // Render admin panel with more options
-  renderAdminPanel();
+  // Restore store status
+  const ov = getOwnerOverride();
+  if (ov && ov.closed) {
+    document.getElementById('adminToggle').classList.add('on');
+    document.getElementById('adminDot').classList.add('off');
+    document.getElementById('adminMsgArea').classList.add('show');
+    document.getElementById('adminMsgInput').value = ov.message || '';
+  }
 }
 
-function renderAdminPanel() {
+function toggleAdminPanel() {
+  const panel = document.getElementById('adminPanel');
+  if (!panel.innerHTML.includes('Add New Item')) {
+    renderFullAdminPanel();
+  }
+  panel.classList.toggle('open');
+}
+
+function renderFullAdminPanel() {
   const panel = document.getElementById('adminPanel');
   panel.innerHTML = `
     <h4>⚙️ Owner Panel</h4>
-    <div style="margin:12px 0; font-size:0.9rem; color:#666;">
-      <strong>Admin Mode Active</strong> — Changes saved locally
+    
+    <!-- Store Status -->
+    <div class="admin-toggle-row">
+      <span><span class="admin-status-dot" id="adminDot"></span> Temporarily Closed</span>
+      <div class="toggle-switch" id="adminToggle" onclick="toggleOwnerClosed()"></div>
     </div>
-    
+    <div class="admin-msg-area" id="adminMsgArea">
+      <label>Custom message for customers:</label>
+      <textarea id="adminMsgInput" placeholder="e.g. Closed today for a family event..."></textarea>
+    </div>
+    <button class="admin-apply-btn" onclick="applyOwnerStatus()">✅ Apply Store Status</button>
+
+    <hr style="margin:20px 0; border-color:#eee">
+
+    <!-- Menu Management -->
     <button onclick="addNewItem()" class="admin-btn">➕ Add New Item</button>
-    <button onclick="resetMenu()" class="admin-btn secondary">Reset to Original Menu</button>
+    <button onclick="resetMenu()" class="admin-btn secondary">Reset Menu to Original</button>
     
-    <div id="adminItemsList" style="max-height:400px; overflow:auto; margin-top:15px;"></div>
+    <div id="adminItemsList" style="max-height:420px; overflow:auto; margin-top:15px; font-size:0.95rem;"></div>
   `;
 
   renderAdminItemsList();
@@ -38,10 +63,10 @@ function renderAdminPanel() {
 
 function renderAdminItemsList() {
   const container = document.getElementById('adminItemsList');
-  let html = '';
+  let html = '<strong>Menu Items (Click to manage)</strong><br><br>';
 
   Object.keys(adminMenu).forEach(catId => {
-    html += `<h5 style="margin:15px 0 8px; color:var(--primary);">${catId}</h5>`;
+    html += `<h5 style="margin:12px 0 6px; color:var(--primary);">${catId.toUpperCase()}</h5>`;
     
     adminMenu[catId].forEach((item, index) => {
       const isAvailable = item.available !== false;
@@ -50,10 +75,10 @@ function renderAdminItemsList() {
           <span>${item.name}</span>
           <div>
             <button onclick="toggleItemAvailability('${catId}', ${index})" class="small-btn ${isAvailable ? 'green' : 'red'}">
-              ${isAvailable ? '✅ Visible' : '🚫 Hidden'}
+              ${isAvailable ? '✅' : '🚫'}
             </button>
-            <button onclick="editItem('${catId}', ${index})" class="small-btn">Edit</button>
-            <button onclick="deleteItem('${catId}', ${index})" class="small-btn danger">Delete</button>
+            <button onclick="editItem('${catId}', ${index})" class="small-btn">✏️</button>
+            <button onclick="deleteItem('${catId}', ${index})" class="small-btn danger">🗑️</button>
           </div>
         </div>`;
     });
@@ -62,34 +87,39 @@ function renderAdminItemsList() {
   container.innerHTML = html;
 }
 
+// ==================== ITEM MANAGEMENT ====================
+
 function toggleItemAvailability(catId, index) {
   const item = adminMenu[catId][index];
   item.available = !item.available;
   saveAdminMenu();
   renderAdminItemsList();
-  buildSections(); // refresh menu
+  buildSections(); // refresh public menu
 }
 
 function editItem(catId, index) {
   const item = adminMenu[catId][index];
-  const newName = prompt("Item Name:", item.name);
+  
+  const newName = prompt("📝 Item Name:", item.name);
   if (newName === null) return;
-
   item.name = newName;
-  item.desc = prompt("Description:", item.desc || '') || item.desc;
+
+  item.desc = prompt("📝 Description:", item.desc || '') || item.desc;
   
   if (item.price !== undefined) {
-    item.price = parseInt(prompt("Price:", item.price)) || item.price;
+    const newPrice = prompt("💰 Price (number only):", item.price);
+    if (newPrice !== null) item.price = parseInt(newPrice) || item.price;
   }
 
-  alert("Item updated! (Image editing coming soon)");
   saveAdminMenu();
   buildSections();
   renderAdminItemsList();
+  showToast("✅ Item updated");
 }
 
 function deleteItem(catId, index) {
   if (!confirm("Delete this item permanently?")) return;
+  
   adminMenu[catId].splice(index, 1);
   saveAdminMenu();
   buildSections();
@@ -97,22 +127,22 @@ function deleteItem(catId, index) {
 }
 
 function addNewItem() {
-  const catId = prompt("Which category? (bakedsushi, maki, platters, etc.)", "bakedsushi");
+  const catId = prompt("Category ID (e.g. bakedsushi, maki, platters):", "bakedsushi");
   if (!adminMenu[catId]) {
-    alert("Invalid category!");
-    return;
+    if (confirm("Category doesn't exist. Create it?")) {
+      adminMenu[catId] = [];
+    } else return;
   }
 
-  const name = prompt("Item Name:");
+  const name = prompt("New Item Name:");
   if (!name) return;
 
   const newItem = {
     id: Date.now(),
     name: name,
-    desc: prompt("Description:") || "",
-    emoji: "🍣",
-    price: parseInt(prompt("Price (0 = Contact us):")) || 0,
-    images: []
+    desc: prompt("Description (optional):") || "Fresh and delicious",
+    price: parseInt(prompt("Price:", "299")) || 299,
+    available: true
   };
 
   adminMenu[catId].push(newItem);
@@ -121,21 +151,54 @@ function addNewItem() {
   renderAdminItemsList();
 }
 
+// ==================== SAVE & RESET ====================
+
 function saveAdminMenu() {
   localStorage.setItem('tisoy_menu', JSON.stringify(adminMenu));
-  showToast("✅ Changes saved");
 }
 
 function resetMenu() {
-  if (confirm("Reset menu to original? All changes will be lost.")) {
+  if (confirm("Reset ALL menu changes to original?")) {
     localStorage.removeItem('tisoy_menu');
     location.reload();
   }
 }
 
-// Make functions global
+// Keep original functions
+function toggleOwnerClosed() {
+  const tog  = document.getElementById('adminToggle');
+  const dot  = document.getElementById('adminDot');
+  const area = document.getElementById('adminMsgArea');
+  const isOn = tog.classList.toggle('on');
+  dot.classList.toggle('off', isOn);
+  area.classList.toggle('show', isOn);
+}
+
+function applyOwnerStatus() {
+  const isOn = document.getElementById('adminToggle').classList.contains('on');
+  const msg  = document.getElementById('adminMsgInput').value.trim();
+
+  if (isOn) {
+    localStorage.setItem('tisoy_owner_status', JSON.stringify({
+      closed: true,
+      message: msg || 'We are temporarily unavailable.'
+    }));
+  } else {
+    localStorage.removeItem('tisoy_owner_status');
+  }
+
+  document.getElementById('adminPanel').classList.remove('open');
+  delete document.getElementById('closedOverlay').dataset.dismissed;
+  checkStoreStatus();
+  showToast(isOn ? '🔴 Store set to CLOSED' : '✅ Store set to OPEN');
+}
+
+// Make functions available globally
 window.toggleItemAvailability = toggleItemAvailability;
 window.editItem = editItem;
 window.deleteItem = deleteItem;
 window.addNewItem = addNewItem;
 window.resetMenu = resetMenu;
+window.toggleAdminPanel = toggleAdminPanel;
+window.toggleOwnerClosed = toggleOwnerClosed;
+window.applyOwnerStatus = applyOwnerStatus;
