@@ -895,3 +895,26 @@ footer { background: var(--dark); color: rgba(255,255,255,0.75); padding: 38px 2
   background: var(--accent-dark);
   transform: translateY(-2px);
 }
+
+.admin-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: #f9f9f9;
+  margin-bottom: 8px;
+  border-radius: 8px;
+}
+
+.small-btn {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  margin-left: 4px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.small-btn.green { background: #4caf50; color: white; }
+.small-btn.red { background: #f44336; color: white; }
+.small-btn.danger { background: #e74c3c; color: white; }
