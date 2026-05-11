@@ -76,9 +76,18 @@ function cardHTML(item) {
   const tagHTML = item.tag === 'bestseller' ? `<span class="tag-best">⭐ Best Seller</span>`
                 : item.tag === 'new'        ? `<span class="tag-new">✨ New</span>` : '';
   const spicy   = item.tag === 'spicy'      ? `<span class="tag-spicy">🌶️ Spicy</span>` : '';
+
+  const imgContent = item.image
+    ? `<img src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"  />
+       <span class="card-emoji-fallback" style="display:none">${item.emoji}</span>`
+    : `<span class="card-emoji-fallback">${item.emoji}</span>`;
+
   return `
   <div class="menu-card">
-    <div class="menu-card-img">${tagHTML}${spicy}${item.emoji}</div>
+    <div class="menu-card-img">
+      ${tagHTML}${spicy}
+      ${imgContent}
+    </div>
     <div class="card-body">
       <h3>${item.name}</h3>
       <p>${item.desc}</p>
