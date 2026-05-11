@@ -78,25 +78,25 @@ function cardHTML(item) {
   
   const spicy = item.tag === 'spicy' ? `<span class="tag-spicy">🌶️ Spicy</span>` : '';
 
-  // === IMPROVED IMAGE HANDLING ===
+  // Image handling
   let imgContent = `<span class="card-emoji-fallback">${item.emoji}</span>`;
 
   if (item.images && item.images.length > 0) {
     let imgSrc = item.images[0];
-    
-    // Force correct path
     if (!imgSrc.startsWith('/images/')) {
       if (imgSrc.startsWith('images/')) imgSrc = '/' + imgSrc;
       else imgSrc = '/images/' + imgSrc.replace(/^\/+/, '');
     }
-
     imgContent = `
       <img src="${imgSrc}" 
            alt="${item.name}" 
            loading="lazy" 
-           onerror="console.log('Image failed: ${imgSrc}'); this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
       <span class="card-emoji-fallback" style="display:none">${item.emoji}</span>`;
   }
+
+  // Make the whole card clickable
+  const cardClick = `onclick="showItemModal(menu['${activeCat}'].find(i => i.id === ${item.id}))" style="cursor:pointer"`;
 
   // Items with size variants
   if (item.variants && item.variants.length) {
@@ -107,7 +107,7 @@ function cardHTML(item) {
     const safeN = item.name.replace(/'/g,"\\'");
     
     return `
-  <div class="menu-card">
+  <div class="menu-card" ${cardClick}>
     <div class="menu-card-img">${tagHTML}${spicy}${imgContent}</div>
     <div class="card-body">
       <h3>${item.name}</h3>
@@ -115,7 +115,7 @@ function cardHTML(item) {
       <select class="variant-select" id="var-${item.id}" onchange="updateVariantPrice(${item.id},this)">${opts}</select>
       <div class="card-foot">
         <span class="item-price" id="price-${item.id}">${firstPrice ? '₱' + firstPrice : 'Contact us'}</span>
-        <button class="add-btn" onclick="addVariantToCart(${item.id},'${safeN}','${item.emoji}')">＋ Add</button>
+        <button class="add-btn" onclick="event.stopImmediatePropagation(); addVariantToCart(${item.id},'${safeN}','${item.emoji}')">＋ Add</button>
       </div>
     </div>
   </div>`;
@@ -124,7 +124,7 @@ function cardHTML(item) {
   // Single price items
   const displayPrice = item.price ? '₱' + item.price : 'Contact us';
   return `
-  <div class="menu-card" onclick="showItemModal(menu['${activeCat || 'bakedsushi'}'].find(i => i.id === ${item.id}))" style="cursor:pointer">
+  <div class="menu-card" ${cardClick}>
     <div class="menu-card-img">
       ${tagHTML}${spicy}
       ${imgContent}
@@ -134,7 +134,7 @@ function cardHTML(item) {
       <p>${item.desc}</p>
       <div class="card-foot">
         <span class="item-price">${displayPrice}</span>
-        <button class="add-btn" onclick="addToCart(${item.id},'${item.name.replace(/'/g,"\\'")}',${item.price},'${item.emoji}')">＋ Add</button>
+        <button class="add-btn" onclick="event.stopImmediatePropagation(); addToCart(${item.id},'${item.name.replace(/'/g,"\\'")}',${item.price},'${item.emoji}')">＋ Add</button>
       </div>
     </div>
   </div>`;
