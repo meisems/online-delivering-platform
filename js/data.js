@@ -3,10 +3,11 @@
    Tisoy Sushi Maki — Full Menu
 
    Item shape:
-     Single price  → { id, name, desc, emoji, tag?, price }
-     Size variants → { id, name, desc, emoji, tag?, variants: [{ size, price, note? }] }
+     Single price  → { id, name, desc, emoji, tag?, price, images? }
+     Size variants → { id, name, desc, emoji, tag?, variants: [{ size, price, note? }], images? }
 
    price: 0 = "Contact us for pricing"
+   images: array of relative paths (e.g. 'images/filename.jpg')
 ══════════════════════════════════════ */
 
 const categories = [
@@ -46,8 +47,18 @@ const menu = {
         { size: 'Large',  price: 599, note: 'Good for 4–5 pax · 4 nori' },
       ],
     },
-    { id: 3, name: 'Spicy Cheese Baked Sushi', emoji: '🌶️', tag: 'spicy', desc: 'Baked sushi loaded with spicy cheese topping. Contact us for pricing.', images: ['images/FB_IMG_1778470845642.jpg'], price: 0 },
-    { id: 4, name: '3-Flavor Baked Sushi',     emoji: '🫙',                desc: 'Three flavors in one tray, served with 6 pcs nori. Contact us for pricing.', images: ['images/FB_IMG_1778470845642.jpg'], price: 0 },
+    {
+      id: 3, name: 'Spicy Cheese Baked Sushi', emoji: '🌶️', tag: 'spicy',
+      desc: 'Baked sushi loaded with spicy cheese topping. Contact us for pricing.',
+      images: ['images/FB_IMG_1778470845642.jpg'],
+      price: 0,
+    },
+    {
+      id: 4, name: '3-Flavor Baked Sushi', emoji: '🫙',
+      desc: 'Three flavors in one tray, served with 6 pcs nori. Contact us for pricing.',
+      images: ['images/FB_IMG_1778470845642.jpg'],
+      price: 0,
+    },
   ],
 
   // ─────────────────────────────────────────
@@ -124,11 +135,11 @@ const menu = {
         { size: '80 pcs', price: 1479, note: 'Good for 8–9 pax' },
       ],
     },
-    { id: 28, name: 'Assorted – Cali / Spicy Overload / Futo (30 pcs)', emoji: '🍱',                    desc: 'Three-flavor combo platter. Good for 3–4 pax.',                                   price: 559, images: ['images/FB_IMG_1778470837513.jpg', 'images/FB_IMG_1778470891325.jpg', 'images/FB_IMG_1778470896119.jpg', 'images/FB_IMG_1778470898326.jpg', 'images/FB_IMG_1778470901816.jpg'] },
-    { id: 29, name: 'Assorted – Overload / Crazy / California (30 pcs)', emoji: '⭐', tag: 'bestseller', desc: 'Best-seller trio platter.',                                                        price: 539, images: ['images/FB_IMG_1778470820675.jpg', 'images/FB_IMG_1778470903569.jpg'] },
-    { id: 30, name: 'Assorted – Cali / Futo / Veggies (50 pcs)',         emoji: '🍱',                    desc: 'Light trio of California, Futo, and veggie rolls. Good for 5–6 pax.',            price: 999, images: ['images/FB_IMG_1778470907064.jpg'] },
+    { id: 28, name: 'Assorted – Cali / Spicy Overload / Futo (30 pcs)', emoji: '🍱',                    desc: 'Three-flavor combo platter. Good for 3–4 pax.',                              price: 559,  images: ['images/FB_IMG_1778470837513.jpg', 'images/FB_IMG_1778470891325.jpg', 'images/FB_IMG_1778470896119.jpg', 'images/FB_IMG_1778470898326.jpg', 'images/FB_IMG_1778470901816.jpg'] },
+    { id: 29, name: 'Assorted – Overload / Crazy / California (30 pcs)', emoji: '⭐', tag: 'bestseller', desc: 'Best-seller trio platter.',                                                   price: 539,  images: ['images/FB_IMG_1778470820675.jpg', 'images/FB_IMG_1778470903569.jpg'] },
+    { id: 30, name: 'Assorted – Cali / Futo / Veggies (50 pcs)',         emoji: '🍱',                    desc: 'Light trio of California, Futo, and veggie rolls. Good for 5–6 pax.',       price: 999,  images: ['images/FB_IMG_1778470907064.jpg'] },
     { id: 31, name: 'Assorted – Futo / Maru / Veggies (42 pcs)',         emoji: '🍱',                    desc: 'Hearty combo of futo, maru, and veggie maki. Good for 4–5 pax. Contact us.', price: 0,   images: [] },
-    { id: 32, name: '30 pcs Maki Roll – All Baked (Regular)',             emoji: '🫙',                    desc: 'Full tray of baked maki rolls in regular flavor. Good for 7–8 pax.',            price: 1349, images: [] },
+    { id: 32, name: '30 pcs Maki Roll – All Baked (Regular)',             emoji: '🫙',                    desc: 'Full tray of baked maki rolls in regular flavor. Good for 7–8 pax.',        price: 1349, images: [] },
   ],
 
   // ─────────────────────────────────────────
@@ -150,9 +161,9 @@ const menu = {
         { size: 'XL',     price: 799, note: 'Good for 8–9 pax' },
       ],
     },
-    { id: 34, name: 'Kani / Overload / Haru Maki (32 pcs)', emoji: '🥗', desc: 'Kani, overload, and haru roll combo.',                        price: 569, images: [] },
-    { id: 35, name: '30 pcs Maki w/ Kani Salad',            emoji: '🍱', desc: 'Assorted maki rolls served with kani salad on the side.',    price: 699, images: ['images/FB_IMG_1778470894814.jpg'] },
-    { id: 36, name: '50 pcs Maki w/ Kani Salad',            emoji: '🍱', desc: 'Larger maki set paired with kani salad.',                    price: 699, images: [] },
+    { id: 34, name: 'Kani / Overload / Haru Maki (32 pcs)', emoji: '🥗', desc: 'Kani, overload, and haru roll combo.',                     price: 569, images: [] },
+    { id: 35, name: '30 pcs Maki w/ Kani Salad',            emoji: '🍱', desc: 'Assorted maki rolls served with kani salad on the side.', price: 699, images: ['images/FB_IMG_1778470894814.jpg'] },
+    { id: 36, name: '50 pcs Maki w/ Kani Salad',            emoji: '🍱', desc: 'Larger maki set paired with kani salad.',                 price: 699, images: [] },
   ],
 
   // ─────────────────────────────────────────
@@ -178,7 +189,10 @@ const menu = {
     {
       id: 38, name: 'Assorted Maki w/ Haru Salad', emoji: '🍱',
       desc: 'Combination of assorted maki and haru maki salad rolls.',
-      images: ['images/FB_IMG_1778470921628.jpg', 'images/FB_IMG_1778471031375.jpg'],
+      images: [
+        'images/FB_IMG_1778470921628.jpg',
+        'images/FB_IMG_1778471031375.jpg',
+      ],
       variants: [
         { size: '42 pcs', price: 759,  note: 'Good for 4–5 pax' },
         { size: '54 pcs', price: 889,  note: 'Good for 5–6 pax' },
@@ -194,23 +208,23 @@ const menu = {
   // BIRTHDAY SETS
   // ─────────────────────────────────────────
   birthdaysets: [
-    { id: 42, name: 'Birthday Set A',           emoji: '🎂', tag: 'bestseller', desc: '30 pcs assorted maki + small baked sushi. Includes dedication card, nori & chopsticks. Good for 7–8 pax.',                                           price: 1349, images: ['images/FB_IMG_1778471035880.jpg'] },
-    { id: 43, name: 'Birthday Set B',           emoji: '🎂',                    desc: 'Assorted maki + large baked sushi + haru maki salad (48 pcs). Includes dedication, nori & chopsticks. Good for 16–18 pax. Contact us for pricing.',  price: 0,    images: [] },
-    { id: 44, name: 'Birthday Set (15–16 pax)', emoji: '🎂',                    desc: '80 pcs assorted maki + 60 pcs haru maki salad + baked sushi. Includes dedication, nori & free chopsticks. Contact us for pricing.',                 price: 0,    images: [] },
-    { id: 45, name: 'Birthday Set (17–19 pax)', emoji: '🎂',                    desc: 'Assorted maki, baked sushi & kani salad. Includes dedication & chopsticks. Contact us for pricing.',                                                price: 0,    images: ['images/FB_IMG_1778471033589.jpg'] },
-    { id: 46, name: 'Birthday Set (18–20 pax)', emoji: '🎂',                    desc: 'Assorted maki + 3-flavor baked sushi + kani salad. Includes dedication & chopsticks.',                                                             price: 3099, images: ['images/FB_IMG_1778471037585.jpg', 'images/FB_IMG_1778471058540.jpg'] },
-    { id: 47, name: 'Birthday Set (24–25 pax)', emoji: '🎂',                    desc: '90 pcs assorted maki + 48 pcs haru maki salad. Includes dedication, nori & chopsticks. Contact us for pricing.',                                   price: 0,    images: [] },
+    { id: 42, name: 'Birthday Set A',           emoji: '🎂', tag: 'bestseller', desc: '30 pcs assorted maki + small baked sushi. Includes dedication card, nori & chopsticks. Good for 7–8 pax.',                                          price: 1349, images: ['images/FB_IMG_1778471035880.jpg'] },
+    { id: 43, name: 'Birthday Set B',           emoji: '🎂',                    desc: 'Assorted maki + large baked sushi + haru maki salad (48 pcs). Includes dedication, nori & chopsticks. Good for 16–18 pax. Contact us for pricing.', price: 0,    images: [] },
+    { id: 44, name: 'Birthday Set (15–16 pax)', emoji: '🎂',                    desc: '80 pcs assorted maki + 60 pcs haru maki salad + baked sushi. Includes dedication, nori & free chopsticks. Contact us for pricing.',                price: 0,    images: [] },
+    { id: 45, name: 'Birthday Set (17–19 pax)', emoji: '🎂',                    desc: 'Assorted maki, baked sushi & kani salad. Includes dedication & chopsticks. Contact us for pricing.',                                               price: 0,    images: ['images/FB_IMG_1778471033589.jpg'] },
+    { id: 46, name: 'Birthday Set (18–20 pax)', emoji: '🎂',                    desc: 'Assorted maki + 3-flavor baked sushi + kani salad. Includes dedication & chopsticks.',                                                            price: 3099, images: ['images/FB_IMG_1778471037585.jpg', 'images/FB_IMG_1778471058540.jpg'] },
+    { id: 47, name: 'Birthday Set (24–25 pax)', emoji: '🎂',                    desc: '90 pcs assorted maki + 48 pcs haru maki salad. Includes dedication, nori & chopsticks. Contact us for pricing.',                                  price: 0,    images: [] },
   ],
 
   // ─────────────────────────────────────────
   // PARTY SETS
   // ─────────────────────────────────────────
   partysets: [
-    { id: 48, name: 'Party Set (28–30 pax)',            emoji: '🎉', tag: 'bestseller', desc: '48 pcs haro maki salad + 70 pcs assorted maki + 2 big baked sushi w/ spicy + kani salad. Free mini haru schiiro.',                          price: 4099, images: ['images/FB_IMG_1778471044176.jpg', 'images/FB_IMG_1778471046379.jpg', 'images/FB_IMG_1778471059522.jpg'] },
-    { id: 49, name: 'Birthday Set Platter (20–22 pax)', emoji: '🎉',                    desc: '90 pcs assorted maki + baked sushi + kani salad + haru maki salad + 70 pc dedication platter. Free nori, chopsticks & dedication card.',    price: 2799, images: ['images/FB_IMG_1778471040426.jpg'] },
-    { id: 50, name: 'Party Set Platter (15–17 pax)',    emoji: '🎉',                    desc: 'Baked sushi (overload maki – best seller), 4 pcs nori & free chopsticks. 30 pcs mini party platter included. Contact us for pricing.',      price: 0,    images: [] },
-    { id: 51, name: 'Party Set (36–38 pax)',            emoji: '🎉',                    desc: 'Assorted maki and haru maki salad. Includes mini kani salad (small). Contact us for pricing.',                                              price: 0,    images: [] },
-    { id: 52, name: 'Party Set (50–52 pax)',            emoji: '🎉',                    desc: '90 pcs maki + 48 pcs haru maki salad + kani salad. Free nori and chopsticks. Contact us for pricing.',                                      price: 0,    images: [] },
+    { id: 48, name: 'Party Set (28–30 pax)',            emoji: '🎉', tag: 'bestseller', desc: '48 pcs haro maki salad + 70 pcs assorted maki + 2 big baked sushi w/ spicy + kani salad. Free mini haru schiiro.',                       price: 4099, images: ['images/FB_IMG_1778471044176.jpg', 'images/FB_IMG_1778471046379.jpg', 'images/FB_IMG_1778471059522.jpg'] },
+    { id: 49, name: 'Birthday Set Platter (20–22 pax)', emoji: '🎉',                    desc: '90 pcs assorted maki + baked sushi + kani salad + haru maki salad + 70 pc dedication platter. Free nori, chopsticks & dedication card.', price: 2799, images: ['images/FB_IMG_1778471040426.jpg'] },
+    { id: 50, name: 'Party Set Platter (15–17 pax)',    emoji: '🎉',                    desc: 'Baked sushi (overload maki – best seller), 4 pcs nori & free chopsticks. 30 pcs mini party platter included. Contact us for pricing.',   price: 0,    images: [] },
+    { id: 51, name: 'Party Set (36–38 pax)',            emoji: '🎉',                    desc: 'Assorted maki and haru maki salad. Includes mini kani salad (small). Contact us for pricing.',                                           price: 0,    images: [] },
+    { id: 52, name: 'Party Set (50–52 pax)',            emoji: '🎉',                    desc: '90 pcs maki + 48 pcs haru maki salad + kani salad. Free nori and chopsticks. Contact us for pricing.',                                   price: 0,    images: [] },
   ],
 
   // ─────────────────────────────────────────
@@ -220,10 +234,13 @@ const menu = {
     {
       id: 53, name: '90 pcs Assorted Maki Roll', emoji: '📦', tag: 'bestseller',
       desc: 'Massive maki platter for big gatherings.',
-      images: ['images/FB_IMG_1778470908507.jpg', 'images/FB_IMG_1778470917601.jpg'],
+      images: [
+        'images/FB_IMG_1778470908507.jpg',
+        'images/FB_IMG_1778470917601.jpg',
+      ],
       variants: [
-        { size: 'Standard',  price: 1599, note: 'Good for 9–10 pax' },
-        { size: 'w/ Spicy',  price: 1959, note: 'Good for 10–12 pax' },
+        { size: 'Standard', price: 1599, note: 'Good for 9–10 pax' },
+        { size: 'w/ Spicy', price: 1959, note: 'Good for 10–12 pax' },
       ],
     },
   ],
