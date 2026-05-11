@@ -299,6 +299,7 @@ body { font-family: 'Nunito', sans-serif; background: #ffffff; color: var(--dark
 
 /* ═══ CART SIDEBAR ═══ */
 .cart-sidebar { width: 338px; flex-shrink: 0; position: sticky; top: 84px; }
+.cart-sidebar { display: none; }
 .cart-box { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
 /* Cart header → Italy Green */
 .cart-hd {
