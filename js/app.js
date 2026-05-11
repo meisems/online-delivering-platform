@@ -155,3 +155,61 @@ function showToast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
 }
+
+/* ── Search ── */
+function searchMenu(query) {
+  const q = query.trim().toLowerCase();
+  const clearBtn = document.getElementById('searchClear');
+  const mobileCats = document.getElementById('mobileCats');
+  const secHd = document.querySelector('.section-hd');
+
+  clearBtn.classList.toggle('hidden', q === '');
+
+  if (!q) {
+    clearSearch();
+    return;
+  }
+
+  // Hide category nav and section header while searching
+  mobileCats.style.display = 'none';
+  secHd.style.display = 'none';
+
+  // Gather all matching items across every category
+  const results = [];
+  categories.forEach(cat => {
+    menu[cat.id].forEach(item => {
+      if (
+        item.name.toLowerCase().includes(q) ||
+        item.desc.toLowerCase().includes(q) ||
+        cat.label.toLowerCase().includes(q)
+      ) {
+        results.push({ ...item, catLabel: cat.label });
+      }
+    });
+  });
+
+  // Render results into menuSections
+  const wrap = document.getElementById('menuSections');
+  if (results.length === 0) {
+    wrap.innerHTML = `
+      <div class="no-results">
+        <div class="nr-icon">🍣</div>
+        <p>No items found for "<strong>${query}</strong>"</p>
+        <p style="font-size:0.8rem;margin-top:6px;">Try searching "maki", "salmon", or "baked"</p>
+      </div>`;
+  } else {
+    wrap.innerHTML = `
+      <div class="search-results-hd">Showing <span>${results.length}</span> result${results.length > 1 ? 's' : ''} for "<span>${query}</span>"</div>
+      <div class="menu-grid">${results.map(cardHTML).join('')}</div>`;
+  }
+}
+
+function clearSearch() {
+  const input = document.getElementById('menuSearch');
+  input.value = '';
+  document.getElementById('searchClear').classList.add('hidden');
+  document.getElementById('mobileCats').style.display = '';
+  document.querySelector('.section-hd').style.display = '';
+  buildSections();
+  setActiveCat(activeCat);
+}
