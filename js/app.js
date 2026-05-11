@@ -71,74 +71,30 @@ function buildSections() {
   });
 }
 
-/* ── Menu card HTML ── */
-function cardHTML(item) {
-  const tagHTML = item.tag === 'bestseller' ? `<span class="tag-best">⭐ Best Seller</span>`
-                : item.tag === 'new' ? `<span class="tag-new">✨ New</span>` : '';
-  
-  const spicy = item.tag === 'spicy' ? `<span class="tag-spicy">🌶️ Spicy</span>` : '';
-
-  // Image handling
-  let imgContent = `<span class="card-emoji-fallback">${item.emoji}</span>`;
-
-  if (item.images && item.images.length > 0) {
-    let imgSrc = item.images[0];
-    if (!imgSrc.startsWith('/images/')) {
-      if (imgSrc.startsWith('images/')) imgSrc = '/' + imgSrc;
-      else imgSrc = '/images/' + imgSrc.replace(/^\/+/, '');
-    }
-    imgContent = `
-      <img src="${imgSrc}" 
-           alt="${item.name}" 
-           loading="lazy" 
-           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
-      <span class="card-emoji-fallback" style="display:none">${item.emoji}</span>`;
-  }
-
-  // Make the whole card clickable
-  const cardClick = `onclick="showItemModal(menu['${activeCat}'].find(i => i.id === ${item.id}))" style="cursor:pointer"`;
-
-  // Items with size variants
-  if (item.variants && item.variants.length) {
-    const firstPrice = item.variants[0].price;
-    const opts = item.variants.map((v, i) =>
-      `<option value="${i}" data-price="${v.price}">${v.size}${v.note ? ' · ' + v.note : ''} — ${v.price ? '₱' + v.price : 'Contact us'}</option>`
-    ).join('');
-    const safeN = item.name.replace(/'/g,"\\'");
+<!-- ITEM DETAIL MODAL - Full Image Version -->
+<div id="itemModal" class="modal">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeItemModal()">×</span>
     
-    return `
-  <div class="menu-card" ${cardClick}>
-    <div class="menu-card-img">${tagHTML}${spicy}${imgContent}</div>
-    <div class="card-body">
-      <h3>${item.name}</h3>
-      <p>${item.desc}</p>
-      <select class="variant-select" id="var-${item.id}" onchange="updateVariantPrice(${item.id},this)">${opts}</select>
-      <div class="card-foot">
-        <span class="item-price" id="price-${item.id}">${firstPrice ? '₱' + firstPrice : 'Contact us'}</span>
-        <button class="add-btn" onclick="event.stopImmediatePropagation(); addVariantToCart(${item.id},'${safeN}','${item.emoji}')">＋ Add</button>
-      </div>
+    <!-- Full Image -->
+    <div class="modal-image">
+      <img id="modalImage" src="" alt="">
     </div>
-  </div>`;
-  }
-
-  // Single price items
-  const displayPrice = item.price ? '₱' + item.price : 'Contact us';
-  return `
-  <div class="menu-card" ${cardClick}>
-    <div class="menu-card-img">
-      ${tagHTML}${spicy}
-      ${imgContent}
+    
+    <div class="modal-body">
+      <h2 id="modalName"></h2>
+      <p id="modalDesc"></p>
+      
+      <div id="modalVariants"></div>
+      
+      <div class="modal-price" id="modalPrice"></div>
+      
+      <button class="add-to-cart-btn" id="modalAddBtn">
+        ＋ Add to Cart
+      </button>
     </div>
-    <div class="card-body">
-      <h3>${item.name}</h3>
-      <p>${item.desc}</p>
-      <div class="card-foot">
-        <span class="item-price">${displayPrice}</span>
-        <button class="add-btn" onclick="event.stopImmediatePropagation(); addToCart(${item.id},'${item.name.replace(/'/g,"\\'")}',${item.price},'${item.emoji}')">＋ Add</button>
-      </div>
-    </div>
-  </div>`;
-}
+  </div>
+</div>
 
 /* ── Variant helpers ── */
 function updateVariantPrice(itemId, sel) {
