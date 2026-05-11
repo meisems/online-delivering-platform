@@ -622,3 +622,42 @@ footer { background: var(--dark); color: rgba(255,255,255,0.75); padding: 38px 2
 .admin-apply-btn:hover { opacity: 0.9; }
 .admin-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block; margin-right: 4px; }
 .admin-status-dot.off { background: var(--accent); }
+
+/* === CENTER HERO === */
+.hero-inner {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.hero-left {
+  max-width: 680px;
+  width: 100%;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-right {
+  display: none; /* hide the emoji placeholder */
+}
+
+.hero-actions {
+  justify-content: center;
+}
+
+.hero-stats {
+  justify-content: center;
+}
+
+.order-toggle {
+  justify-content: center;
+}
+
+.hero h1 {
+  text-align: center;
+}
+
+.hero-desc {
+  text-align: center;
+}
