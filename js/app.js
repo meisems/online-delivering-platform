@@ -74,13 +74,21 @@ function buildSections() {
 /* ── Menu card HTML ── */
 function cardHTML(item) {
   const tagHTML = item.tag === 'bestseller' ? `<span class="tag-best">⭐ Best Seller</span>`
-                : item.tag === 'new'        ? `<span class="tag-new">✨ New</span>` : '';
-  const spicy   = item.tag === 'spicy'      ? `<span class="tag-spicy">🌶️ Spicy</span>` : '';
+                : item.tag === 'new' ? `<span class="tag-new">✨ New</span>` : '';
+  const spicy = item.tag === 'spicy' ? `<span class="tag-spicy">🌶️ Spicy</span>` : '';
 
-  const imgContent = item.image
-    ? `<img src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"  />
-       <span class="card-emoji-fallback" style="display:none">${item.emoji}</span>`
-    : `<span class="card-emoji-fallback">${item.emoji}</span>`;
+  // FIXED: Use images array + getFullImagePath
+  let imgContent = `<span class="card-emoji-fallback">${item.emoji}</span>`;
+
+  if (item.images && item.images.length > 0) {
+    const imgSrc = getFullImagePath(item.images[0]);
+    imgContent = `
+      <img src="${imgSrc}" 
+           alt="${item.name}" 
+           loading="lazy" 
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
+      <span class="card-emoji-fallback" style="display:none">${item.emoji}</span>`;
+  }
 
   // Items with size variants
   if (item.variants && item.variants.length) {
@@ -104,7 +112,7 @@ function cardHTML(item) {
   </div>`;
   }
 
-  // Items with a single flat price
+  // Items with single price
   const displayPrice = item.price ? '₱' + item.price : 'Contact us';
   return `
   <div class="menu-card">
