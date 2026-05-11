@@ -673,3 +673,24 @@ footer { background: var(--dark); color: rgba(255,255,255,0.75); padding: 38px 2
   text-align: center;
   justify-content: center;
 }
+
+/* === CENTER MENU AREA === */
+.main-wrapper {
+  justify-content: center;
+}
+
+.menu-area {
+  max-width: 860px;
+  width: 100%;
+}
+
+.mobile-cats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.section-hd {
+  text-align: center;
+}
