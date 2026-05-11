@@ -96,7 +96,7 @@ function cardHTML(item) {
   }
 
   // Make the whole card clickable
-  const cardClick = `onclick="showItemModal(menu['${activeCat}'].find(i => i.id === ${item.id}))" style="cursor:pointer"`;
+  const cardClick = `onclick="showItemModalById(${item.id})" style="cursor:pointer"`;
 
   // Items with size variants
   if (item.variants && item.variants.length) {
