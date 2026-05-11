@@ -70,25 +70,35 @@ function editItemInline(catId, itemId) {
     <input type="hidden" id="editCatId" value="${catId}">
     <input type="hidden" id="editItemId" value="${itemId}">
     
+    <!-- Image Preview & URL -->
+    <div class="fg">
+      <label>Image URL</label>
+      <input id="editImageUrl" type="text" value="${item.images && item.images[0] ? item.images[0] : ''}" placeholder="images/filename.jpg or full URL">
+      <div id="imagePreview" style="margin-top:10px; text-align:center;">
+        ${item.images && item.images[0] ? 
+          `<img src="${item.images[0]}" style="max-height:180px; max-width:100%; border-radius:12px; border:1px solid #ddd;">` : 
+          '<p style="color:#999;">No image yet</p>'}
+      </div>
+    </div>
+
     <div class="fg">
       <label>Item Name *</label>
       <input id="editName" type="text" value="${(item.name || '').replace(/"/g, '&quot;')}">
     </div>
     <div class="fg">
       <label>Description</label>
-      <textarea id="editDesc" rows="3">${(item.desc || '').replace(/</g, '&lt;')}</textarea>
+      <textarea id="editDesc" rows="3">${(item.desc || '')}</textarea>
     </div>`;
 
+  // Price Section
   if (!item.variants || item.variants.length === 0) {
-    // Simple item (no variants)
     html += `
       <div class="fg">
         <label>Price (₱)</label>
         <input id="editPrice" type="number" value="${item.price || ''}">
       </div>`;
   } else {
-    // Item with variants (Small, Medium, Large, etc.)
-    html += `<h4 style="margin: 20px 0 12px; color: var(--primary);">Price per Size</h4>`;
+    html += `<h4 style="margin:20px 0 12px; color:var(--primary);">Price per Size</h4>`;
     item.variants.forEach((v, i) => {
       html += `
         <div class="fg">
@@ -118,14 +128,19 @@ function saveEditedItem() {
   item.name = document.getElementById('editName').value.trim();
   item.desc = document.getElementById('editDesc').value.trim();
 
+  // Update Image
+  const newImageUrl = document.getElementById('editImageUrl').value.trim();
+  if (newImageUrl) {
+    item.images = [newImageUrl];
+  }
+
+  // Update Price(s)
   if (!item.variants || item.variants.length === 0) {
-    // Single price item
     const price = parseInt(document.getElementById('editPrice').value);
     if (!isNaN(price)) item.price = price;
   } else {
-    // Multiple variants
     document.querySelectorAll('.variant-price-input').forEach(input => {
-      const index = parseInt(input.getAttribute('data-index'));
+      const index = parseInt(input.dataset.index);
       const price = parseInt(input.value);
       if (!isNaN(price) && item.variants[index]) {
         item.variants[index].price = price;
@@ -138,7 +153,6 @@ function saveEditedItem() {
   closeAdminEditModal();
   showToast("✅ Changes saved successfully!");
 }
-
 function closeAdminEditModal() {
   document.getElementById('adminEditModal').style.display = 'none';
 }
