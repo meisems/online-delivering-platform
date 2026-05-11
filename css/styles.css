@@ -846,3 +846,93 @@ footer { background: var(--dark); color: rgba(255,255,255,0.75); padding: 38px 2
   font-weight: 700;
 }
 .no-results .nr-icon { font-size: 3rem; margin-bottom: 10px; }
+
+/* ===================== ITEM MODAL ===================== */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.75);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+}
+
+.modal-content {
+  background: white;
+  max-width: 480px;
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 32px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+  z-index: 10;
+  line-height: 1;
+}
+
+.modal-image img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-body h2 {
+  margin: 0 0 12px 0;
+  font-size: 1.5rem;
+  color: #222;
+}
+
+.modal-body p {
+  color: #555;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.modal-variants select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
+
+.modal-price {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #e74c3c;
+  margin: 15px 0;
+}
+
+.add-to-cart-btn {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.add-to-cart-btn:hover {
+  background: #c0392b;
+}
