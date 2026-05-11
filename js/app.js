@@ -344,6 +344,19 @@ function showItemModal(item) {
   document.getElementById('itemModal').style.display = 'flex';
 }
 
+function showItemModalById(id) {
+  // Search in all categories
+  let item = null;
+  Object.values(menu).forEach(cat => {
+    const found = cat.find(i => i.id === id);
+    if (found) item = found;
+  });
+
+  if (item) {
+    showItemModal(item);
+  }
+}
+
 function updateModalPrice() {
   const sel = document.getElementById('modalVariantSelect');
   if (!sel) return;
