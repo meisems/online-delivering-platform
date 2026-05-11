@@ -75,13 +75,21 @@ function buildSections() {
 function cardHTML(item) {
   const tagHTML = item.tag === 'bestseller' ? `<span class="tag-best">⭐ Best Seller</span>`
                 : item.tag === 'new' ? `<span class="tag-new">✨ New</span>` : '';
+  
   const spicy = item.tag === 'spicy' ? `<span class="tag-spicy">🌶️ Spicy</span>` : '';
 
-  // FIXED: Use images array + getFullImagePath
+  // === FINAL IMAGE HANDLING ===
   let imgContent = `<span class="card-emoji-fallback">${item.emoji}</span>`;
 
   if (item.images && item.images.length > 0) {
-    const imgSrc = getFullImagePath(item.images[0]);
+    let imgSrc = item.images[0];
+    
+    // Force correct path
+    if (!imgSrc.startsWith('/images/')) {
+      if (imgSrc.startsWith('images/')) imgSrc = '/' + imgSrc;
+      else imgSrc = '/images/' + imgSrc.replace(/^\/+/, '');
+    }
+
     imgContent = `
       <img src="${imgSrc}" 
            alt="${item.name}" 
@@ -90,13 +98,14 @@ function cardHTML(item) {
       <span class="card-emoji-fallback" style="display:none">${item.emoji}</span>`;
   }
 
-  // Items with size variants
+  // Rest of the function remains the same...
   if (item.variants && item.variants.length) {
     const firstPrice = item.variants[0].price;
     const opts = item.variants.map((v, i) =>
       `<option value="${i}" data-price="${v.price}">${v.size}${v.note ? ' · ' + v.note : ''} — ${v.price ? '₱' + v.price : 'Contact us'}</option>`
     ).join('');
     const safeN = item.name.replace(/'/g,"\\'");
+    
     return `
   <div class="menu-card">
     <div class="menu-card-img">${tagHTML}${spicy}${imgContent}</div>
@@ -112,7 +121,6 @@ function cardHTML(item) {
   </div>`;
   }
 
-  // Items with single price
   const displayPrice = item.price ? '₱' + item.price : 'Contact us';
   return `
   <div class="menu-card">
