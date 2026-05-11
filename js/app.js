@@ -85,15 +85,24 @@ function cardHTML(item, catId = null) {
                 : item.tag === 'new' ? `<span class="tag-new">✨ New</span>` : '';
   const spicy = item.tag === 'spicy' ? `<span class="tag-spicy">🌶️ Spicy</span>` : '';
 
+    // Image handling - Improved for external URLs
   let imgContent = `<span class="card-emoji-fallback">${item.emoji}</span>`;
+  
   if (item.images && item.images.length > 0) {
     let imgSrc = item.images[0];
-    if (!imgSrc.startsWith('/images/')) {
+    
+    // Support external URLs (http/https)
+    if (imgSrc.startsWith('http')) {
+      // External link - no modification needed
+    } else if (!imgSrc.startsWith('/images/')) {
       if (imgSrc.startsWith('images/')) imgSrc = '/' + imgSrc;
       else imgSrc = '/images/' + imgSrc.replace(/^\/+/, '');
     }
+    
     imgContent = `
-      <img src="${imgSrc}" alt="${item.name}" loading="lazy"
+      <img src="${imgSrc}"
+           alt="${item.name}"
+           loading="lazy"
            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
       <span class="card-emoji-fallback" style="display:none">${item.emoji}</span>`;
   }
