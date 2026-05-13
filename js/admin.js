@@ -5,7 +5,7 @@
 let isAdminMode = false;
 let adminMenu = null;
 
-function initAdmin() {
+async function initAdmin() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('admin') !== 'tisoy2025') return;
 
@@ -13,12 +13,19 @@ function initAdmin() {
   window.isAdminMode = true;
   document.getElementById('adminFab').classList.add('visible');
 
-  // Load saved menu or original
-  const saved = localStorage.getItem('tisoy_menu');
-  adminMenu = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(menu));
-  window.adminMenu = adminMenu;
+  // Load saved menu from server, fall back to original data.js menu
+  try {
+    const res = await fetch('/api/menu');
+    const data = await res.json();
+    adminMenu = data && Object.keys(data).length > 0
+      ? data
+      : JSON.parse(JSON.stringify(menu));
+  } catch (e) {
+    adminMenu = JSON.parse(JSON.stringify(menu));
+  }
 
-  buildSections(); // Refresh with admin data
+  window.adminMenu = adminMenu;
+  buildSections();
 }
 
 // ==================== STORE STATUS ====================
@@ -31,23 +38,28 @@ function toggleOwnerClosed() {
   const tog = document.getElementById('adminToggle');
   const dot = document.getElementById('adminDot');
   const area = document.getElementById('adminMsgArea');
-  
+
   const isOn = tog.classList.toggle('on');
   dot.classList.toggle('off', isOn);
   area.classList.toggle('show', isOn);
 }
 
-function applyOwnerStatus() {
+async function applyOwnerStatus() {
   const isClosed = document.getElementById('adminToggle').classList.contains('on');
   const msg = document.getElementById('adminMsgInput').value.trim();
 
-  if (isClosed) {
-    localStorage.setItem('tisoy_owner_status', JSON.stringify({
-      closed: true,
-      message: msg || 'We are temporarily unavailable.'
-    }));
-  } else {
-    localStorage.removeItem('tisoy_owner_status');
+  try {
+    await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        store_closed: isClosed ? '1' : '0',
+        store_message: msg || 'We are temporarily unavailable.'
+      })
+    });
+  } catch (e) {
+    showToast('⚠️ Failed to save status');
+    console.error(e);
   }
 
   document.getElementById('adminPanel').classList.remove('open');
@@ -75,8 +87,8 @@ function editItemInline(catId, itemId) {
       <label>Image URL</label>
       <input id="editImageUrl" type="text" value="${item.images && item.images[0] ? item.images[0] : ''}" placeholder="images/filename.jpg or full URL">
       <div id="imagePreview" style="margin-top:10px; text-align:center;">
-        ${item.images && item.images[0] ? 
-          `<img src="${item.images[0]}" style="max-height:180px; max-width:100%; border-radius:12px; border:1px solid #ddd;">` : 
+        ${item.images && item.images[0] ?
+          `<img src="${item.images[0]}" style="max-height:180px; max-width:100%; border-radius:12px; border:1px solid #ddd;">` :
           '<p style="color:#999;">No image yet</p>'}
       </div>
     </div>
@@ -118,7 +130,7 @@ function editItemInline(catId, itemId) {
   document.getElementById('adminEditModal').style.display = 'flex';
 }
 
-function saveEditedItem() {
+async function saveEditedItem() {
   const catId = document.getElementById('editCatId').value;
   const itemId = parseInt(document.getElementById('editItemId').value);
   const item = getAdminItem(catId, itemId);
@@ -148,7 +160,7 @@ function saveEditedItem() {
     });
   }
 
-  saveAdminMenu();
+  await saveAdminMenu();
   buildSections();
   closeAdminEditModal();
   showToast("✅ Changes saved successfully!");
@@ -158,28 +170,37 @@ function closeAdminEditModal() {
   document.getElementById('adminEditModal').style.display = 'none';
 }
 
-function toggleItemVisibility(catId, itemId) {
+async function toggleItemVisibility(catId, itemId) {
   const item = getAdminItem(catId, itemId);
   if (!item) return;
-  
+
   item.available = item.available === false ? true : false;
-  saveAdminMenu();
+  await saveAdminMenu();
   buildSections();
 }
 
-function deleteItemInline(catId, itemId) {
+async function deleteItemInline(catId, itemId) {
   if (!confirm("Delete this item permanently?")) return;
-  
+
   if (adminMenu[catId]) {
     adminMenu[catId] = adminMenu[catId].filter(item => item.id !== itemId);
-    saveAdminMenu();
+    await saveAdminMenu();
     buildSections();
     showToast("🗑️ Item deleted");
   }
 }
 
-function saveAdminMenu() {
-  localStorage.setItem('tisoy_menu', JSON.stringify(adminMenu));
+async function saveAdminMenu() {
+  try {
+    await fetch('/api/menu', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(adminMenu)
+    });
+  } catch (e) {
+    showToast('⚠️ Failed to save — check server');
+    console.error(e);
+  }
 }
 
 // ==================== GLOBAL ACCESS ====================
