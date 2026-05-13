@@ -13,11 +13,12 @@ window.isAdminMode = false;
 window.adminMenu = null;
 
 /* ── DOMContentLoaded ── */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadMenuFromServer(); // ← load server menu before building anything
   loadCart();
   buildNavs();
   buildSections();
-  setActiveCat(activeCat);               // Fixed
+  setActiveCat(activeCat);
   renderCart();
   checkStoreStatus();
   initAdmin();
@@ -35,6 +36,20 @@ document.addEventListener('DOMContentLoaded', () => {
     o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); });
   });
 });
+
+// Load menu from server for all users
+async function loadMenuFromServer() {
+  try {
+    const res = await fetch('/api/menu');
+    const data = await res.json();
+    if (data && Object.keys(data).length > 0) {
+      // Overwrite the hardcoded menu from data.js
+      Object.keys(data).forEach(cat => { menu[cat] = data[cat]; });
+    }
+  } catch (e) {
+    console.warn('Could not load menu from server, using default.');
+  }
+}
 
 /* ── Category nav builders ── */
 function buildNavs() {
