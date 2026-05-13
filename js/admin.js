@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════
-   admin.js — Store Status + Full Inline Menu Editing
+   admin.js — Store Status + Full Inline Menu Editing + Add New Item
 ══════════════════════════════════════ */
 
 let isAdminMode = false;
@@ -13,7 +13,6 @@ async function initAdmin() {
   window.isAdminMode = true;
   document.getElementById('adminFab').classList.add('visible');
 
-  // Load saved menu from server, fall back to original data.js menu
   try {
     const res = await fetch('/api/menu');
     const data = await res.json();
@@ -67,7 +66,128 @@ async function applyOwnerStatus() {
   showToast(isClosed ? '🔴 Store is now CLOSED' : '✅ Store is now OPEN');
 }
 
-// ==================== ADMIN ITEM EDITING ====================
+// ==================== ADD NEW MENU ITEM ====================
+
+window.addNewItem = function() {
+  const catOptions = categories.map(cat => 
+    `<option value="\( {cat.id}"> \){cat.emoji} ${cat.label}</option>`
+  ).join('');
+
+  const html = `
+    <input type="hidden" id="isNewItem" value="true">
+
+    <div class="fg">
+      <label><strong>Category *</strong></label>
+      <select id="newItemCategory" class="full-width">
+        ${catOptions}
+      </select>
+    </div>
+
+    <div class="fg">
+      <label><strong>Item Name *</strong></label>
+      <input type="text" id="newItemName" placeholder="e.g. Spicy Salmon Maki">
+    </div>
+
+    <div class="fg">
+      <label>Description (optional)</label>
+      <textarea id="newItemDesc" rows="3" placeholder="Fresh salmon, spicy mayo, tempura bits..."></textarea>
+    </div>
+
+    <div class="fg">
+      <label>Emoji</label>
+      <input type="text" id="newItemEmoji" value="🍣" maxlength="2" style="font-size:1.8rem; width:80px; text-align:center;">
+    </div>
+
+    <div class="fg">
+      <label>Image URL (optional)</label>
+      <input type="text" id="newItemImage" placeholder="images/new-maki.jpg or full https:// link">
+    </div>
+
+    <div class="fg">
+      <label>Price Type</label>
+      <select id="newItemPriceType" onchange="togglePriceFields(this.value)">
+        <option value="single">Single Price</option>
+        <option value="variants">Multiple Variants / Sizes</option>
+      </select>
+    </div>
+
+    <!-- Single Price -->
+    <div id="singlePriceGroup" class="fg">
+      <label>Price (₱)</label>
+      <input type="number" id="newItemPrice" placeholder="259" value="259">
+    </div>
+
+    <!-- Variants -->
+    <div id="variantsGroup" class="fg" style="display:none;">
+      <label>Variants (one per line)</label>
+      <textarea id="newItemVariants" rows="5" placeholder="Regular | 259&#10;Large | 359 | Best for sharing&#10;Party | 899 | Serves 4-5"></textarea>
+      <small>Format: Size | Price | Note (optional)</small>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeAdminEditModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveNewItem()">✅ Add Item</button>
+    </div>
+  `;
+
+  document.getElementById('editModalBody').innerHTML = html;
+  document.getElementById('adminEditModal').style.display = 'flex';
+  document.querySelector('#adminEditModal .modal-hd h3').textContent = '➕ Add New Item';
+};
+
+window.togglePriceFields = function(type) {
+  document.getElementById('singlePriceGroup').style.display = type === 'single' ? 'block' : 'none';
+  document.getElementById('variantsGroup').style.display = type === 'variants' ? 'block' : 'none';
+};
+
+window.saveNewItem = async function() {
+  const categoryId = document.getElementById('newItemCategory').value;
+  const name = document.getElementById('newItemName').value.trim();
+
+  if (!name) {
+    alert("Item name is required!");
+    return;
+  }
+
+  const newItem = {
+    id: Date.now(),
+    name: name,
+    desc: document.getElementById('newItemDesc').value.trim(),
+    emoji: document.getElementById('newItemEmoji').value.trim() || '🍣',
+    images: []
+  };
+
+  // Image
+  const imageUrl = document.getElementById('newItemImage').value.trim();
+  if (imageUrl) newItem.images = [imageUrl];
+
+  // Price / Variants
+  if (document.getElementById('newItemPriceType').value === 'single') {
+    const price = parseInt(document.getElementById('newItemPrice').value);
+    if (price) newItem.price = price;
+  } else {
+    const lines = document.getElementById('newItemVariants').value.trim().split('\n');
+    newItem.variants = lines.map(line => {
+      const parts = line.split('|').map(p => p.trim());
+      return {
+        size: parts[0],
+        price: parseInt(parts[1]),
+        note: parts[2] || ''
+      };
+    }).filter(v => v.size && !isNaN(v.price));
+  }
+
+  // Add to menu
+  if (!adminMenu[categoryId]) adminMenu[categoryId] = [];
+  adminMenu[categoryId].push(newItem);
+
+  await saveAdminMenu();
+  buildSections();
+  closeAdminEditModal();
+  showToast(`✅ ${name} added successfully!`);
+};
+
+// ==================== EXISTING EDIT / DELETE FUNCTIONS ====================
 
 function getAdminItem(catId, itemId) {
   if (!adminMenu || !adminMenu[catId]) return null;
@@ -78,11 +198,11 @@ function editItemInline(catId, itemId) {
   const item = getAdminItem(catId, itemId);
   if (!item) return alert("Item not found");
 
+  // ... (your existing editItemInline code remains unchanged)
   let html = `
     <input type="hidden" id="editCatId" value="${catId}">
     <input type="hidden" id="editItemId" value="${itemId}">
     
-    <!-- Image Preview & URL -->
     <div class="fg">
       <label>Image URL</label>
       <input id="editImageUrl" type="text" value="${item.images && item.images[0] ? item.images[0] : ''}" placeholder="images/filename.jpg or full URL">
@@ -102,7 +222,6 @@ function editItemInline(catId, itemId) {
       <textarea id="editDesc" rows="3">${(item.desc || '')}</textarea>
     </div>`;
 
-  // Price Section
   if (!item.variants || item.variants.length === 0) {
     html += `
       <div class="fg">
@@ -114,8 +233,8 @@ function editItemInline(catId, itemId) {
     item.variants.forEach((v, i) => {
       html += `
         <div class="fg">
-          <label>${v.size} ${v.note ? `(${v.note})` : ''}</label>
-          <input type="number" class="variant-price-input" data-index="${i}" value="${v.price || ''}">
+          <label>${v.size} \( {v.note ? `( \){v.note})` : ''}</label>
+          <input type="number" class="variant-price-input" data-index="\( {i}" value=" \){v.price || ''}">
         </div>`;
     });
   }
@@ -132,21 +251,17 @@ function editItemInline(catId, itemId) {
 
 async function saveEditedItem() {
   const catId = document.getElementById('editCatId').value;
-  const itemId = parseInt(document.getElementById('editItemId').value);
-  const item = getAdminItem(catId, itemId);
+  const itemId = document.getElementById('editItemId').value;
+  const item = getAdminItem(catId, Number(itemId));
 
   if (!item) return alert("Item not found");
 
   item.name = document.getElementById('editName').value.trim();
   item.desc = document.getElementById('editDesc').value.trim();
 
-  // Update Image URL
   const newImageUrl = document.getElementById('editImageUrl').value.trim();
-  if (newImageUrl) {
-    item.images = [newImageUrl];
-  }
+  if (newImageUrl) item.images = [newImageUrl];
 
-  // Update Price(s)
   if (!item.variants || item.variants.length === 0) {
     const price = parseInt(document.getElementById('editPrice').value);
     if (!isNaN(price)) item.price = price;
@@ -173,7 +288,6 @@ function closeAdminEditModal() {
 async function toggleItemVisibility(catId, itemId) {
   const item = getAdminItem(catId, itemId);
   if (!item) return;
-
   item.available = item.available === false ? true : false;
   await saveAdminMenu();
   buildSections();
@@ -212,3 +326,4 @@ window.deleteItemInline = deleteItemInline;
 window.toggleAdminPanel = toggleAdminPanel;
 window.toggleOwnerClosed = toggleOwnerClosed;
 window.applyOwnerStatus = applyOwnerStatus;
+window.addNewItem = addNewItem;           // ← Added
