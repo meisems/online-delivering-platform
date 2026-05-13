@@ -6,7 +6,7 @@ const app = express();
 const db = new Database('tisoy.db');
 
 app.use(express.json());
-app.use(express.static('.'));
+app.use(express.static(path.join(__dirname)));
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS settings (
@@ -43,7 +43,7 @@ app.post('/api/menu', (req, res) => {
 });
 
 app.get('*', (req, res) => {
-  res.sendFile(path.resolve('index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
