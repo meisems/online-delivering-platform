@@ -273,26 +273,17 @@
 
 <!-- ADMIN FAB & PANEL -->
 <div class="admin-fab" id="adminFab" onclick="toggleAdminPanel()" title="Owner Panel">⚙️</div>
-<!-- ADMIN PANEL -->
 <div class="admin-panel" id="adminPanel">
   <h4>⚙️ Owner Panel</h4>
-  
   <div class="admin-toggle-row">
     <span><span class="admin-status-dot" id="adminDot"></span> Temporarily Closed</span>
     <div class="toggle-switch" id="adminToggle" onclick="toggleOwnerClosed()"></div>
   </div>
-
   <div class="admin-msg-area" id="adminMsgArea">
     <label>Custom message for customers:</label>
-    <textarea id="adminMsgInput" placeholder="e.g. Closed today for a family event..."></textarea>
+    <textarea id="adminMsgInput" placeholder="e.g. Closed today for a family event. Back tomorrow at 10AM! 🙏"></textarea>
   </div>
-
-  <button class="admin-apply-btn" onclick="applyOwnerStatus()">✅ Apply & Publish</button>
-
-  <!-- NEW: Add Item Button -->
-  <button onclick="addNewItem()" class="admin-add-btn" style="margin-top:12px; width:100%; padding:12px; background:#10b981; color:white; border:none; border-radius:8px; font-weight:700;">
-    ➕ Add New Menu Item
-  </button>
+  <button class="admin-apply-btn" onclick="applyOwnerStatus()">✅ Apply &amp; Publish</button>
 </div>
 
 <!-- WHATSAPP FLOAT -->
