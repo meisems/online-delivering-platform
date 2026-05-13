@@ -21,9 +21,21 @@ function formatPHTime(d) {
   });
 }
 
-function getOwnerOverride() {
-  try { return JSON.parse(localStorage.getItem('tisoy_owner_status') || 'null'); }
-  catch (e) { return null; }
+// Fetch owner override from server instead of localStorage
+async function getOwnerOverride() {
+  try {
+    const res = await fetch('/api/settings');
+    const data = await res.json();
+    if (data.store_closed === '1') {
+      return {
+        closed: true,
+        message: data.store_message || 'We are temporarily unavailable.'
+      };
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
 }
 
 function setOrderingDisabled(disabled) {
@@ -41,8 +53,8 @@ function dismissClosedOverlay() {
   overlay.dataset.dismissed = '1';
 }
 
-function checkStoreStatus() {
-  const override = getOwnerOverride();
+async function checkStoreStatus() {
+  const override = await getOwnerOverride();
   const bar      = document.getElementById('storeStatusBar');
   const icon     = document.getElementById('storeStatusIcon');
   const msgEl    = document.getElementById('storeStatusMsg');
