@@ -1056,3 +1056,32 @@ footer { background: var(--dark); color: rgba(255,255,255,0.75); padding: 38px 2
   background: #ff4d4d;
   color: white;
 }
+
+.admin-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  z-index: 1000;
+  cursor: pointer;
+  border: none;
+}
+
+.add-menu-fab {
+  bottom: 90px; /* Stack above the gear */
+  background: #10b981; /* Green for add */
+  font-size: 24px;
+}
+
+.admin-fab:hover, .add-menu-fab:hover {
+  transform: scale(1.1);
+}
