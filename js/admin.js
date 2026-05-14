@@ -203,6 +203,158 @@ async function saveAdminMenu() {
   }
 }
 
+// ==================== ADD NEW MENU ITEM ====================
+
+function showAddMenuModal() {
+  if (!window.isAdminMode) return;
+
+  const html = `
+    <div class="fg">
+      <label>Category *</label>
+      <select id="newCatId">
+        ${categories.map(cat => `<option value="${cat.id}">${cat.emoji} ${cat.label}</option>`).join('')}
+      </select>
+    </div>
+
+    <div class="fg">
+      <label>Item Name *</label>
+      <input id="newName" type="text" placeholder="e.g. Spicy Tuna Maki">
+    </div>
+
+    <div class="fg">
+      <label>Description</label>
+      <textarea id="newDesc" rows="3" placeholder="Short description..."></textarea>
+    </div>
+
+    <!-- Image -->
+    <div class="fg">
+      <label>Image URL / Path</label>
+      <input id="newImageUrl" type="text" placeholder="images/new-item.jpg or full https:// url">
+      <div id="newImagePreview" style="margin-top:10px; text-align:center; min-height:100px;"></div>
+    </div>
+
+    <!-- Price Type -->
+    <div class="fg">
+      <label>Pricing Type</label>
+      <select id="newPriceType" onchange="toggleVariantFields()">
+        <option value="single">Single Price</option>
+        <option value="variants">Multiple Sizes / Variants</option>
+      </select>
+    </div>
+
+    <!-- Single Price -->
+    <div id="singlePriceGroup" class="fg">
+      <label>Price (₱)</label>
+      <input id="newPrice" type="number" placeholder="199">
+    </div>
+
+    <!-- Variants -->
+    <div id="variantsGroup" class="fg" style="display:none;">
+      <h4>Variants (Size + Price)</h4>
+      <div id="variantInputs">
+        <!-- Dynamic variants added here -->
+      </div>
+      <button onclick="addVariantField()" class="btn-secondary" style="margin-top:8px;">+ Add Size/Variant</button>
+    </div>
+
+    <div class="modal-actions" style="margin-top:20px;">
+      <button class="btn-secondary" onclick="closeAddMenuModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveNewMenuItem()">✅ Add Item</button>
+    </div>
+  `;
+
+  document.getElementById('addMenuBody').innerHTML = html;
+  document.getElementById('addMenuModal').style.display = 'flex';
+
+  // Initial variant field
+  addVariantField();
+}
+
+function toggleVariantFields() {
+  const type = document.getElementById('newPriceType').value;
+  document.getElementById('singlePriceGroup').style.display = type === 'single' ? 'block' : 'none';
+  document.getElementById('variantsGroup').style.display = type === 'variants' ? 'block' : 'none';
+}
+
+let variantCounter = 0;
+
+function addVariantField() {
+  variantCounter++;
+  const container = document.getElementById('variantInputs');
+  const div = document.createElement('div');
+  div.className = 'fg';
+  div.style.marginBottom = '8px';
+  div.innerHTML = `
+    <div style="display:flex; gap:8px;">
+      <input type="text" placeholder="Size (e.g. Small)" class="variant-size" style="flex:1;">
+      <input type="number" placeholder="Price" class="variant-price" style="width:100px;">
+      <button onclick="this.parentElement.parentElement.remove()" class="btn-secondary" style="padding:0 10px;">×</button>
+    </div>
+  `;
+  container.appendChild(div);
+}
+
+function closeAddMenuModal() {
+  document.getElementById('addMenuModal').style.display = 'none';
+  variantCounter = 0;
+}
+
+async function saveNewMenuItem() {
+  if (!window.adminMenu) {
+    window.adminMenu = JSON.parse(JSON.stringify(menu));
+  }
+
+  const catId = document.getElementById('newCatId').value;
+  const name = document.getElementById('newName').value.trim();
+  const desc = document.getElementById('newDesc').value.trim();
+  const imageUrl = document.getElementById('newImageUrl').value.trim();
+
+  if (!name || !catId) {
+    alert("Name and Category are required!");
+    return;
+  }
+
+  let newItem = {
+    id: Date.now(), // Unique ID
+    name: name,
+    desc: desc || '',
+    emoji: '🍣', // Default, can be edited later
+    images: imageUrl ? [imageUrl] : []
+  };
+
+  const priceType = document.getElementById('newPriceType').value;
+
+  if (priceType === 'single') {
+    const price = parseInt(document.getElementById('newPrice').value) || 0;
+    newItem.price = price;
+  } else {
+    const sizes = [];
+    document.querySelectorAll('#variantInputs > div').forEach(div => {
+      const sizeInput = div.querySelector('.variant-size');
+      const priceInput = div.querySelector('.variant-price');
+      if (sizeInput && priceInput) {
+        const size = sizeInput.value.trim();
+        const price = parseInt(priceInput.value) || 0;
+        if (size) sizes.push({ size, price });
+      }
+    });
+    if (sizes.length === 0) {
+      alert("Add at least one variant!");
+      return;
+    }
+    newItem.variants = sizes;
+  }
+
+  if (!window.adminMenu[catId]) window.adminMenu[catId] = [];
+  window.adminMenu[catId].push(newItem);
+
+  await saveAdminMenu();   // Existing function
+  buildSections();         // Rebuild menu (existing)
+  closeAddMenuModal();
+
+  showToast(`✅ New item "${name}" added to ${catId}!`);
+}
+
 // ==================== GLOBAL ACCESS ====================
 window.editItemInline = editItemInline;
 window.saveEditedItem = saveEditedItem;
