@@ -272,7 +272,8 @@
 <div class="toast" id="toast"></div>
 
 <!-- ADMIN FAB & PANEL -->
-<div class="admin-fab" id="adminFab" onclick="toggleAdminPanel()" title="Owner Panel">⚙️</div>
+<div class="admin-fab" id="adminFab" onclick="toggleAdminPanel()" title="Owner Panel - Status & Announcements">⚙️</div>
+<div class="admin-fab add-menu-fab" id="addMenuFab" onclick="showAddMenuModal()" title="Add New Menu Item">➕</div>
 <div class="admin-panel" id="adminPanel">
   <h4>⚙️ Owner Panel</h4>
   <div class="admin-toggle-row">
@@ -358,6 +359,19 @@
     </div>
     <div class="modal-bd" id="editModalBody">
       <!-- Filled dynamically by JavaScript -->
+    </div>
+  </div>
+</div>
+
+<!-- ADD MENU MODAL -->
+<div class="overlay" id="addMenuModal" style="display: none;">
+  <div class="modal admin-edit-modal" style="max-width: 500px;">
+    <div class="modal-hd">
+      <h3>➕ Add New Menu Item</h3>
+      <button class="modal-x" onclick="closeAddMenuModal()">✕</button>
+    </div>
+    <div class="modal-bd" id="addMenuBody">
+      <!-- Populated by JS -->
     </div>
   </div>
 </div>
