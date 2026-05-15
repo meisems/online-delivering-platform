@@ -62,21 +62,13 @@ function selPay(el, method) {
 
 function placeOrder() {
   try {
-    // === UPDATED ID CHECKS ===
     const fname = document.getElementById('fname')?.value.trim() || '';
     const lname = document.getElementById('lname')?.value.trim() || '';
     const phone = document.getElementById('phone')?.value.trim() || '';
     
-    // Try multiple possible IDs for address
     let addr = '';
-    const possibleAddrIds = ['addr', 'address', 'deliveryAddress', 'addrInput'];
-    for (let id of possibleAddrIds) {
-      const el = document.getElementById(id);
-      if (el && el.value.trim()) {
-        addr = el.value.trim();
-        break;
-      }
-    }
+    const addrEl = document.getElementById('addr') || document.getElementById('address') || document.getElementById('deliveryAddress');
+    if (addrEl) addr = addrEl.value.trim();
 
     const areaSelect = document.getElementById('areaSelect') || document.getElementById('barangay');
     const barangay = areaSelect ? areaSelect.value.trim() : '';
@@ -84,61 +76,58 @@ function placeOrder() {
     const notes = document.getElementById('notes')?.value.trim() || '';
 
     // Validation
-    if (!fname || !lname) {
-      showToast('⚠️ Please enter your full name');
-      return;
-    }
-    if (!phone) {
-      showToast('⚠️ Please enter your mobile number');
-      return;
-    }
+    if (!fname || !lname) return showToast('⚠️ Please enter your full name');
+    if (!phone) return showToast('⚠️ Please enter your mobile number');
     if (orderType === 'delivery') {
-      if (!addr) {
-        showToast('⚠️ Please enter your delivery address');
-        return;
-      }
-      if (!barangay) {
-        showToast('⚠️ Please select your Barangay / Area');
-        return;
-      }
+      if (!addr) return showToast('⚠️ Please enter your delivery address');
+      if (!barangay) return showToast('⚠️ Please select your Barangay / Area');
     }
 
-    // Rest of the function (order message)
     const orderNum = '#TSM-' + Date.now().toString().slice(-6);
 
     let msg = `🍣 *NEW ORDER — Tisoy Sushi Maki*\n\n`;
     msg += `📌 Order No.: ${orderNum}\n`;
     msg += `👤 Customer: ${fname} ${lname}\n`;
     msg += `📞 Contact: ${phone}\n`;
-    
+
     if (orderType === 'delivery') {
       msg += `📍 Address: ${addr}\n`;
       if (barangay) msg += `📍 Area: ${barangay}\n`;
     }
 
-    msg += `🚚 Type: ${orderType.toUpperCase()}\n\n━━━━━━━━━━━━━━━━━━━━━━\n🛒 ITEMS:\n\n`;
+    msg += `🚚 Type: ${orderType.toUpperCase()}\n\n`;
+    msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    msg += `🛒 ORDER ITEMS:\n\n`;
 
+    // ✅ FIXED: Proper item listing
     cartItems().forEach(item => {
-      msg += `• ${item.name} × \( {item.qty} = ₱ \){item.price * item.qty}\n`;
+      const itemTotal = item.price * item.qty;
+      msg += `• ${item.name} × ${item.qty} = ₱${itemTotal}\n`;
     });
 
-    msg += `\n━━━━━━━━━━━━━━━━━━━━━━\n💰 Total: ₱${total()}\n`;
-    msg += `💳 Payment: ${payMethod ? payMethod.toUpperCase() : 'Cash'}`;
+    msg += `\n━━━━━━━━━━━━━━━━━━━━━━\n`;
+    msg += `💰 Total: ₱${total()}\n`;
+    msg += `💳 Payment: ${payMethod ? payMethod.toUpperCase() : 'Cash on Delivery'}`;
 
+    if (notes) msg += `\n📝 Notes: ${notes}`;
+
+    // Open Messenger
     const fbUrl = `https://www.facebook.com/messages/t/61556171585372?text=${encodeURIComponent(msg)}`;
     window.open(fbUrl, '_blank');
 
-    // Success
+    // Clear cart and show success
     cart = {};
     renderCart();
     closeModal('checkoutModal');
+    
     document.getElementById('orderNumEl').textContent = orderNum;
     openModal('successModal');
-    showToast('✅ Order sent to Tisoy Sushi Maki!');
+
+    showToast('✅ Order sent successfully!');
 
   } catch (err) {
-    console.error(err);
-    showToast('❌ Error occurred. Press F12 and check Console.');
+    console.error("Place Order Error:", err);
+    showToast('❌ Error. Check F12 Console for details.');
   }
 }
 
