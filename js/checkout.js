@@ -120,3 +120,9 @@ function closeSuccess() {
     if (el) el.value = '';
   });
 }
+
+// Expose functions globally
+window.openCheckout = openCheckout;
+window.selPay = selPay;
+window.placeOrder = placeOrder;
+window.closeSuccess = closeSuccess;
