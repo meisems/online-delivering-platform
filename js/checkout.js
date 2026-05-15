@@ -10,7 +10,10 @@ function openCheckout() {
     showToast('🔴 Store is currently closed.'); 
     return; 
   }
-  if (!cartCount()) return;
+  if (cartCount() === 0) {
+    showToast('Your cart is empty!');
+    return;
+  }
 
   closeCartDrawer();
 
@@ -19,17 +22,17 @@ function openCheckout() {
 
   let html = '<h4>🍣 Order Summary</h4>';
   items.forEach(i => {
-    html += `<div class="om-row"><span>${i.emoji} ${i.name} x${i.qty}</span><span>₱${i.price * i.qty}</span></div>`;
+    html += `<div class="om-row"><span>${i.emoji} \( {i.name} x \){i.qty}</span><span>₱${(i.price * i.qty).toFixed(0)}</span></div>`;
   });
 
   html += `<div class="om-row"><span>Delivery Fee</span><span style="color:#e67e00;font-weight:800;">Via Lalamove</span></div>`;
-  html += `<div class="om-total"><span>Items Total</span><span>₱${tot}</span></div>`;
+  html += `<div class="om-total"><span>Total</span><span>₱${tot}</span></div>`;
 
   document.getElementById('checkoutSummary').innerHTML = html;
 
-  // Show address group only for delivery
-  document.getElementById('addrGroup').style.display =
-    (orderType === 'pickup' || orderType === 'dinein') ? 'none' : '';
+  // Show address only for delivery
+  const addrGroup = document.getElementById('addrGroup');
+  if (addrGroup) addrGroup.style.display = (orderType === 'delivery') ? 'block' : 'none';
 
   openModal('checkoutModal');
 }
