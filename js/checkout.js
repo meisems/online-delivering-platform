@@ -62,17 +62,18 @@ function selPay(el, method) {
 
 function placeOrder() {
   try {
+    // Get form values
     const fname = document.getElementById('fname')?.value.trim() || '';
     const lname = document.getElementById('lname')?.value.trim() || '';
     const phone = document.getElementById('phone')?.value.trim() || '';
     
     let addr = '';
-    const addrEl = document.getElementById('addr') || document.getElementById('address') || document.getElementById('deliveryAddress');
+    const addrEl = document.getElementById('addr') || document.getElementById('address');
     if (addrEl) addr = addrEl.value.trim();
 
-    const areaSelect = document.getElementById('areaSelect') || document.getElementById('barangay');
-    const barangay = areaSelect ? areaSelect.value.trim() : '';
-    
+    const areaEl = document.getElementById('areaSelect') || document.getElementById('barangay');
+    const barangay = areaEl ? areaEl.value.trim() : '';
+
     const notes = document.getElementById('notes')?.value.trim() || '';
 
     // Validation
@@ -99,23 +100,24 @@ function placeOrder() {
     msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
     msg += `🛒 ORDER ITEMS:\n\n`;
 
-    // ✅ FIXED: Proper item listing
-    cartItems().forEach(item => {
-      const itemTotal = item.price * item.qty;
+    // ✅ FIXED: Proper loop for items
+    const items = cartItems();
+    items.forEach(item => {
+      const itemTotal = (item.price * item.qty);
       msg += `• ${item.name} × ${item.qty} = ₱${itemTotal}\n`;
     });
 
     msg += `\n━━━━━━━━━━━━━━━━━━━━━━\n`;
     msg += `💰 Total: ₱${total()}\n`;
-    msg += `💳 Payment: ${payMethod ? payMethod.toUpperCase() : 'Cash on Delivery'}`;
+    msg += `💳 Payment: ${payMethod ? payMethod.toUpperCase() : 'COD'}`;
 
     if (notes) msg += `\n📝 Notes: ${notes}`;
 
-    // Open Messenger
+    // Send to Messenger
     const fbUrl = `https://www.facebook.com/messages/t/61556171585372?text=${encodeURIComponent(msg)}`;
     window.open(fbUrl, '_blank');
 
-    // Clear cart and show success
+    // Success
     cart = {};
     renderCart();
     closeModal('checkoutModal');
@@ -127,7 +129,7 @@ function placeOrder() {
 
   } catch (err) {
     console.error("Place Order Error:", err);
-    showToast('❌ Error. Check F12 Console for details.');
+    showToast('❌ Something went wrong. Check F12 Console.');
   }
 }
 
