@@ -11,7 +11,10 @@ async function initAdmin() {
 
   isAdminMode = true;
   window.isAdminMode = true;
-  document.getElementById('adminFab').classList.add('visible');
+
+  // Show admin floating buttons (Gear + Add Menu)
+  const adminControls = document.getElementById('adminControls');
+  if (adminControls) adminControls.style.display = 'block';
 
   // Load saved menu from server, fall back to original data.js menu
   try {
@@ -28,13 +31,20 @@ async function initAdmin() {
   buildSections();
 }
 
+// ==================== ADMIN VISIBILITY ====================
+function checkAdminAccess() {
+  return isAdminMode === true;
+}
+
 // ==================== STORE STATUS ====================
 function toggleAdminPanel() {
+  if (!checkAdminAccess()) return;
   const panel = document.getElementById('adminPanel');
   panel.classList.toggle('open');
 }
 
 function toggleOwnerClosed() {
+  if (!checkAdminAccess()) return;
   const tog = document.getElementById('adminToggle');
   const dot = document.getElementById('adminDot');
   const area = document.getElementById('adminMsgArea');
@@ -45,6 +55,8 @@ function toggleOwnerClosed() {
 }
 
 async function applyOwnerStatus() {
+  if (!checkAdminAccess()) return;
+
   const isClosed = document.getElementById('adminToggle').classList.contains('on');
   const msg = document.getElementById('adminMsgInput').value.trim();
 
@@ -75,6 +87,7 @@ function getAdminItem(catId, itemId) {
 }
 
 function editItemInline(catId, itemId) {
+  if (!checkAdminAccess()) return;
   const item = getAdminItem(catId, itemId);
   if (!item) return alert("Item not found");
 
@@ -114,8 +127,8 @@ function editItemInline(catId, itemId) {
     item.variants.forEach((v, i) => {
       html += `
         <div class="fg">
-          <label>${v.size} ${v.note ? `(${v.note})` : ''}</label>
-          <input type="number" class="variant-price-input" data-index="${i}" value="${v.price || ''}">
+          <label>${v.size} \( {v.note ? `( \){v.note})` : ''}</label>
+          <input type="number" class="variant-price-input" data-index="\( {i}" value=" \){v.price || ''}">
         </div>`;
     });
   }
@@ -131,6 +144,7 @@ function editItemInline(catId, itemId) {
 }
 
 async function saveEditedItem() {
+  if (!checkAdminAccess()) return;
   const catId = document.getElementById('editCatId').value;
   const itemId = parseInt(document.getElementById('editItemId').value);
   const item = getAdminItem(catId, itemId);
@@ -171,6 +185,7 @@ function closeAdminEditModal() {
 }
 
 async function toggleItemVisibility(catId, itemId) {
+  if (!checkAdminAccess()) return;
   const item = getAdminItem(catId, itemId);
   if (!item) return;
 
@@ -180,6 +195,7 @@ async function toggleItemVisibility(catId, itemId) {
 }
 
 async function deleteItemInline(catId, itemId) {
+  if (!checkAdminAccess()) return;
   if (!confirm("Delete this item permanently?")) return;
 
   if (adminMenu[catId]) {
@@ -191,6 +207,7 @@ async function deleteItemInline(catId, itemId) {
 }
 
 async function saveAdminMenu() {
+  if (!checkAdminAccess()) return;
   try {
     await fetch('/api/menu', {
       method: 'POST',
@@ -206,13 +223,13 @@ async function saveAdminMenu() {
 // ==================== ADD NEW MENU ITEM ====================
 
 function showAddMenuModal() {
-  if (!window.isAdminMode) return;
+  if (!checkAdminAccess()) return;
 
   const html = `
     <div class="fg">
       <label>Category *</label>
       <select id="newCatId">
-        ${categories.map(cat => `<option value="${cat.id}">${cat.emoji} ${cat.label}</option>`).join('')}
+        \( {categories.map(cat => `<option value=" \){cat.id}">${cat.emoji} ${cat.label}</option>`).join('')}
       </select>
     </div>
 
@@ -300,9 +317,7 @@ function closeAddMenuModal() {
 }
 
 async function saveNewMenuItem() {
-  if (!window.adminMenu) {
-    window.adminMenu = JSON.parse(JSON.stringify(menu));
-  }
+  if (!checkAdminAccess() || !window.adminMenu) return;
 
   const catId = document.getElementById('newCatId').value;
   const name = document.getElementById('newName').value.trim();
@@ -315,10 +330,10 @@ async function saveNewMenuItem() {
   }
 
   let newItem = {
-    id: Date.now(), // Unique ID
+    id: Date.now(),
     name: name,
     desc: desc || '',
-    emoji: '🍣', // Default, can be edited later
+    emoji: '🍣',
     images: imageUrl ? [imageUrl] : []
   };
 
@@ -348,19 +363,15 @@ async function saveNewMenuItem() {
   if (!window.adminMenu[catId]) window.adminMenu[catId] = [];
   window.adminMenu[catId].push(newItem);
 
-  await saveAdminMenu();   // Existing function
-  buildSections();         // Rebuild menu (existing)
+  await saveAdminMenu();
+  buildSections();
   closeAddMenuModal();
 
   showToast(`✅ New item "${name}" added to ${catId}!`);
 }
 
 // ==================== GLOBAL ACCESS ====================
-window.editItemInline = editItemInline;
-window.saveEditedItem = saveEditedItem;
-window.closeAdminEditModal = closeAdminEditModal;
-window.toggleItemVisibility = toggleItemVisibility;
-window.deleteItemInline = deleteItemInline;
+window.initAdmin = initAdmin;
 window.toggleAdminPanel = toggleAdminPanel;
 window.toggleOwnerClosed = toggleOwnerClosed;
 window.applyOwnerStatus = applyOwnerStatus;
@@ -369,3 +380,8 @@ window.closeAddMenuModal = closeAddMenuModal;
 window.saveNewMenuItem = saveNewMenuItem;
 window.addVariantField = addVariantField;
 window.toggleVariantFields = toggleVariantFields;
+window.editItemInline = editItemInline;
+window.saveEditedItem = saveEditedItem;
+window.closeAdminEditModal = closeAdminEditModal;
+window.toggleItemVisibility = toggleItemVisibility;
+window.deleteItemInline = deleteItemInline;
