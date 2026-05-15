@@ -61,75 +61,79 @@ function selPay(el, method) {
 }
 
 function placeOrder() {
-  const fn = document.getElementById('fname').value.trim();
-  const ln = document.getElementById('lname').value.trim();
-  const ph = document.getElementById('phone').value.trim();
-  const ad = document.getElementById('addr').value.trim();
-  const areaSelect = document.getElementById('areaSelect'); 
-  const barangay = areaSelect ? areaSelect.value : '';
-  const notes = document.getElementById('notes').value.trim();
+  try {
+    const fname = document.getElementById('fname')?.value.trim() || '';
+    const lname = document.getElementById('lname')?.value.trim() || '';
+    const phone = document.getElementById('phone')?.value.trim() || '';
+    const addr = document.getElementById('addr')?.value.trim() || '';
+    const areaSelect = document.getElementById('areaSelect');
+    const barangay = areaSelect ? areaSelect.value : '';
+    const notes = document.getElementById('notes')?.value.trim() || '';
 
-  if (!fn || !ln) { 
-    showToast('⚠️ Please enter your full name'); 
-    return; 
-  }
-  if (!ph) { 
-    showToast('⚠️ Please enter your mobile number'); 
-    return; 
-  }
-  if (orderType === 'delivery') {
-    if (!ad) { 
-      showToast('⚠️ Please enter your delivery address'); 
-      return; 
+    // Validation
+    if (!fname || !lname) {
+      showToast('⚠️ Please enter your full name');
+      return;
     }
-    if (!barangay) { 
-      showToast('⚠️ Please select your Barangay / Area'); 
-      return; 
+    if (!phone) {
+      showToast('⚠️ Please enter your mobile number');
+      return;
     }
+    if (orderType === 'delivery') {
+      if (!addr) {
+        showToast('⚠️ Please enter your delivery address');
+        return;
+      }
+      if (!barangay) {
+        showToast('⚠️ Please select your area / barangay');
+        return;
+      }
+    }
+
+    // Create order message
+    const orderNum = '#TSM-' + (Date.now().toString().slice(-6));
+
+    let msg = `🍣 *NEW ORDER — Tisoy Sushi Maki*\n\n`;
+    msg += `📌 Order No.: ${orderNum}\n`;
+    msg += `👤 Customer: ${fname} ${lname}\n`;
+    msg += `📞 Contact: ${phone}\n`;
+
+    if (orderType === 'delivery') {
+      msg += `📍 Address: ${addr}\n`;
+      if (barangay) msg += `📍 Area: ${barangay}\n`;
+    }
+
+    msg += `🚚 Type: ${orderType.toUpperCase()}\n\n`;
+    msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+    msg += `🛒 ITEMS:\n\n`;
+
+    cartItems().forEach(item => {
+      msg += `• ${item.name} × \( {item.qty} = ₱ \){item.price * item.qty}\n`;
+    });
+
+    msg += `\n━━━━━━━━━━━━━━━━━━━━━━\n`;
+    msg += `💰 Total: ₱${total()}\n`;
+    msg += `💳 Payment: ${payMethod ? payMethod.toUpperCase() : 'Cash'}\n`;
+    if (notes) msg += `📝 Notes: ${notes}\n`;
+
+    // Send via Messenger
+    const fbUrl = `https://www.facebook.com/messages/t/61556171585372?text=${encodeURIComponent(msg)}`;
+    window.open(fbUrl, '_blank');
+
+    // Success flow
+    cart = {};
+    renderCart();
+    closeModal('checkoutModal');
+
+    document.getElementById('orderNumEl').textContent = orderNum;
+    openModal('successModal');
+
+    showToast('✅ Order sent successfully!');
+
+  } catch (err) {
+    console.error("Place Order Error:", err);
+    showToast('❌ Something went wrong. Check console (F12)');
   }
-
-  orderSeq++;
-  const orderNum = '#TSM-' + orderSeq;
-
-  // Build order message
-  let msg = `🍣 *NEW ORDER — Tisoy Sushi Maki*\n\n`;
-  msg += `📌 Order No.: ${orderNum}\n`;
-  msg += `👤 Customer: ${fn} ${ln}\n`;
-  msg += `📞 Contact: ${ph}\n`;
-  
-  if (orderType === 'delivery') {
-    if (ad) msg += `📍 Address: ${ad}\n`;
-    if (barangay) msg += `📍 Area: ${barangay}\n`;
-  }
-
-  msg += `🚚 Order Type: ${orderType === 'delivery' ? 'Delivery' : orderType === 'pickup' ? 'Pick-up' : 'Dine-in'}\n\n`;
-  msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
-  msg += `🛒 ORDER ITEMS:\n\n`;
-
-  cartItems().forEach(i => {
-    msg += `• ${i.name}\n Qty: \( {i.qty} × ₱ \){i.price} = ₱${i.price * i.qty}\n\n`;
-  });
-
-  msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
-  msg += `💰 Items Total: ₱${total()}\n`;
-  msg += `🚗 Delivery Fee: Via Lalamove\n`;
-  if (notes) msg += `📝 Notes: ${notes}\n`;
-  msg += `💳 Payment: ${payMethod.toUpperCase()}\n`;
-  msg += `⏰ Ordered via Website`;
-
-  // Open Facebook Messenger
-  const fbUrl = `https://www.facebook.com/messages/t/61556171585372?text=${encodeURIComponent(msg)}`;
-  window.open(fbUrl, '_blank');
-
-  // Clear cart & show success
-  cart = {};
-  renderCart();
-  closeModal('checkoutModal');
-
-  document.getElementById('orderNumEl').textContent = orderNum;
-  openModal('successModal');
-
-  showToast('✅ Order sent to Tisoy Sushi Maki!');
 }
 
 function closeSuccess() {
@@ -141,8 +145,8 @@ function closeSuccess() {
   });
 }
 
-// Expose functions globally
-window.openCheckout = openCheckout;
-window.selPay = selPay;
+// Make functions available globally
 window.placeOrder = placeOrder;
-window.closeSuccess = closeSuccess;
+window.openCheckout = openCheckout;
+window.selPay = selPay || function(){};
+window.closeSuccess = closeSuccess || function(){};
