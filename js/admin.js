@@ -9,29 +9,30 @@ async function initAdmin() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('admin') !== 'tisoy2025') return;
 
+  console.log('✅ Admin Mode Activated');
   isAdminMode = true;
   window.isAdminMode = true;
 
-  // Show admin floating buttons (Gear + Add Menu)
+  // Show admin buttons
   const adminControls = document.getElementById('adminControls');
   if (adminControls) adminControls.style.display = 'block';
 
-  // Load saved menu from server, fall back to original data.js menu
+  // Load menu
   try {
     const res = await fetch('/api/menu');
     const data = await res.json();
-    adminMenu = data && Object.keys(data).length > 0
-      ? data
-      : JSON.parse(JSON.stringify(menu));
+    adminMenu = data && Object.keys(data).length > 0 
+      ? data 
+      : JSON.parse(JSON.stringify(menu || {}));
   } catch (e) {
-    adminMenu = JSON.parse(JSON.stringify(menu));
+    console.warn('Using local menu data');
+    adminMenu = JSON.parse(JSON.stringify(menu || {}));
   }
 
   window.adminMenu = adminMenu;
-  buildSections();
+  if (typeof buildSections === 'function') buildSections();
 }
 
-// ==================== ADMIN VISIBILITY ====================
 function checkAdminAccess() {
   return isAdminMode === true;
 }
@@ -40,7 +41,7 @@ function checkAdminAccess() {
 function toggleAdminPanel() {
   if (!checkAdminAccess()) return;
   const panel = document.getElementById('adminPanel');
-  panel.classList.toggle('open');
+  if (panel) panel.classList.toggle('open');
 }
 
 function toggleOwnerClosed() {
@@ -71,11 +72,10 @@ async function applyOwnerStatus() {
     });
   } catch (e) {
     showToast('⚠️ Failed to save status');
-    console.error(e);
   }
 
   document.getElementById('adminPanel').classList.remove('open');
-  checkStoreStatus();
+  if (typeof checkStoreStatus === 'function') checkStoreStatus();
   showToast(isClosed ? '🔴 Store is now CLOSED' : '✅ Store is now OPEN');
 }
 
@@ -95,13 +95,12 @@ function editItemInline(catId, itemId) {
     <input type="hidden" id="editCatId" value="${catId}">
     <input type="hidden" id="editItemId" value="${itemId}">
     
-    <!-- Image Preview & URL -->
     <div class="fg">
       <label>Image URL</label>
       <input id="editImageUrl" type="text" value="${item.images && item.images[0] ? item.images[0] : ''}" placeholder="images/filename.jpg or full URL">
       <div id="imagePreview" style="margin-top:10px; text-align:center;">
-        ${item.images && item.images[0] ?
-          `<img src="${item.images[0]}" style="max-height:180px; max-width:100%; border-radius:12px; border:1px solid #ddd;">` :
+        ${item.images && item.images[0] ? 
+          `<img src="${item.images[0]}" style="max-height:180px; max-width:100%; border-radius:12px; border:1px solid #ddd;">` : 
           '<p style="color:#999;">No image yet</p>'}
       </div>
     </div>
@@ -115,7 +114,6 @@ function editItemInline(catId, itemId) {
       <textarea id="editDesc" rows="3">${(item.desc || '')}</textarea>
     </div>`;
 
-  // Price Section
   if (!item.variants || item.variants.length === 0) {
     html += `
       <div class="fg">
@@ -127,8 +125,8 @@ function editItemInline(catId, itemId) {
     item.variants.forEach((v, i) => {
       html += `
         <div class="fg">
-          <label>${v.size} \( {v.note ? `( \){v.note})` : ''}</label>
-          <input type="number" class="variant-price-input" data-index="\( {i}" value=" \){v.price || ''}">
+          <label>${v.size}${v.note ? ` (${v.note})` : ''}</label>
+          <input type="number" class="variant-price-input" data-index="${i}" value="${v.price || ''}">
         </div>`;
     });
   }
@@ -148,19 +146,14 @@ async function saveEditedItem() {
   const catId = document.getElementById('editCatId').value;
   const itemId = parseInt(document.getElementById('editItemId').value);
   const item = getAdminItem(catId, itemId);
-
   if (!item) return alert("Item not found");
 
   item.name = document.getElementById('editName').value.trim();
   item.desc = document.getElementById('editDesc').value.trim();
 
-  // Update Image URL
   const newImageUrl = document.getElementById('editImageUrl').value.trim();
-  if (newImageUrl) {
-    item.images = [newImageUrl];
-  }
+  if (newImageUrl) item.images = [newImageUrl];
 
-  // Update Price(s)
   if (!item.variants || item.variants.length === 0) {
     const price = parseInt(document.getElementById('editPrice').value);
     if (!isNaN(price)) item.price = price;
@@ -215,7 +208,7 @@ async function saveAdminMenu() {
       body: JSON.stringify(adminMenu)
     });
   } catch (e) {
-    showToast('⚠️ Failed to save — check server');
+    showToast('⚠️ Failed to save menu');
     console.error(e);
   }
 }
@@ -229,7 +222,7 @@ function showAddMenuModal() {
     <div class="fg">
       <label>Category *</label>
       <select id="newCatId">
-        \( {categories.map(cat => `<option value=" \){cat.id}">${cat.emoji} ${cat.label}</option>`).join('')}
+        ${categories.map(cat => `<option value="${cat.id}">${cat.emoji} ${cat.label}</option>`).join('')}
       </select>
     </div>
 
@@ -243,14 +236,12 @@ function showAddMenuModal() {
       <textarea id="newDesc" rows="3" placeholder="Short description..."></textarea>
     </div>
 
-    <!-- Image -->
     <div class="fg">
       <label>Image URL / Path</label>
       <input id="newImageUrl" type="text" placeholder="images/new-item.jpg or full https:// url">
       <div id="newImagePreview" style="margin-top:10px; text-align:center; min-height:100px;"></div>
     </div>
 
-    <!-- Price Type -->
     <div class="fg">
       <label>Pricing Type</label>
       <select id="newPriceType" onchange="toggleVariantFields()">
@@ -259,18 +250,14 @@ function showAddMenuModal() {
       </select>
     </div>
 
-    <!-- Single Price -->
     <div id="singlePriceGroup" class="fg">
       <label>Price (₱)</label>
       <input id="newPrice" type="number" placeholder="199">
     </div>
 
-    <!-- Variants -->
     <div id="variantsGroup" class="fg" style="display:none;">
       <h4>Variants (Size + Price)</h4>
-      <div id="variantInputs">
-        <!-- Dynamic variants added here -->
-      </div>
+      <div id="variantInputs"></div>
       <button onclick="addVariantField()" class="btn-secondary" style="margin-top:8px;">+ Add Size/Variant</button>
     </div>
 
@@ -282,8 +269,6 @@ function showAddMenuModal() {
 
   document.getElementById('addMenuBody').innerHTML = html;
   document.getElementById('addMenuModal').style.display = 'flex';
-
-  // Initial variant field
   addVariantField();
 }
 
@@ -366,11 +351,10 @@ async function saveNewMenuItem() {
   await saveAdminMenu();
   buildSections();
   closeAddMenuModal();
-
-  showToast(`✅ New item "${name}" added to ${catId}!`);
+  showToast(`✅ New item "${name}" added!`);
 }
 
-// ==================== GLOBAL ACCESS ====================
+// ==================== GLOBAL ACCESS & INIT ====================
 window.initAdmin = initAdmin;
 window.toggleAdminPanel = toggleAdminPanel;
 window.toggleOwnerClosed = toggleOwnerClosed;
@@ -386,8 +370,4 @@ window.closeAdminEditModal = closeAdminEditModal;
 window.toggleItemVisibility = toggleItemVisibility;
 window.deleteItemInline = deleteItemInline;
 
-
-// ==================== INITIALIZE ADMIN ====================
-document.addEventListener('DOMContentLoaded', () => {
-  initAdmin();
-});
+document.addEventListener('DOMContentLoaded', initAdmin);
