@@ -11,7 +11,7 @@ function openCheckout() {
     return; 
   }
   if (cartCount() === 0) {
-    showToast('Your cart is empty!');
+    showToast('🛒 Your cart is empty!');
     return;
   }
 
@@ -20,19 +20,36 @@ function openCheckout() {
   const items = cartItems();
   const tot = total();
 
-  let html = '<h4>🍣 Order Summary</h4>';
+  let html = `<h4>🍣 Order Summary</h4>`;
+
   items.forEach(i => {
-    html += `<div class="om-row"><span>${i.emoji} \( {i.name} x \){i.qty}</span><span>₱${(i.price * i.qty).toFixed(0)}</span></div>`;
+    const itemTotal = i.price * i.qty;
+    html += `
+      <div class="om-row">
+        <span>${i.emoji || '🍣'} ${i.name} × ${i.qty}</span>
+        <span>₱${itemTotal}</span>
+      </div>
+    `;
   });
 
-  html += `<div class="om-row"><span>Delivery Fee</span><span style="color:#e67e00;font-weight:800;">Via Lalamove</span></div>`;
-  html += `<div class="om-total"><span>Total</span><span>₱${tot}</span></div>`;
+  html += `
+    <div class="om-row">
+      <span>Delivery Fee</span>
+      <span style="color:#e67e00; font-weight:800;">Via Lalamove</span>
+    </div>
+    <div class="om-total">
+      <span><strong>Total</strong></span>
+      <span><strong>₱${tot}</strong></span>
+    </div>
+  `;
 
   document.getElementById('checkoutSummary').innerHTML = html;
 
-  // Show address only for delivery
+  // Show/hide address section based on order type
   const addrGroup = document.getElementById('addrGroup');
-  if (addrGroup) addrGroup.style.display = (orderType === 'delivery') ? 'block' : 'none';
+  if (addrGroup) {
+    addrGroup.style.display = (orderType === 'delivery') ? 'block' : 'none';
+  }
 
   openModal('checkoutModal');
 }
