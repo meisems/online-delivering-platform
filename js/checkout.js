@@ -45,7 +45,8 @@ function placeOrder() {
   const ln = document.getElementById('lname').value.trim();
   const ph = document.getElementById('phone').value.trim();
   const ad = document.getElementById('addr').value.trim();
-  const barangay = document.getElementById('barangay').value.trim();   // ← Updated
+  const areaSelect = document.getElementById('areaSelect'); 
+  const barangay = areaSelect ? areaSelect.value : '';
   const notes = document.getElementById('notes').value.trim();
 
   if (!fn || !ln) { 
@@ -62,7 +63,7 @@ function placeOrder() {
       return; 
     }
     if (!barangay) { 
-      showToast('⚠️ Please enter your Barangay / Area'); 
+      showToast('⚠️ Please select your Barangay / Area'); 
       return; 
     }
   }
@@ -78,7 +79,7 @@ function placeOrder() {
   
   if (orderType === 'delivery') {
     if (ad) msg += `📍 Address: ${ad}\n`;
-    if (barangay) msg += `📍 Barangay: ${barangay}\n`;
+    if (barangay) msg += `📍 Area: ${barangay}\n`;
   }
 
   msg += `🚚 Order Type: ${orderType === 'delivery' ? 'Delivery' : orderType === 'pickup' ? 'Pick-up' : 'Dine-in'}\n\n`;
@@ -86,7 +87,7 @@ function placeOrder() {
   msg += `🛒 ORDER ITEMS:\n\n`;
 
   cartItems().forEach(i => {
-    msg += `• ${i.name}\n Qty: ${i.qty} × ₱${i.price} = ₱${i.price * i.qty}\n\n`;
+    msg += `• ${i.name}\n Qty: \( {i.qty} × ₱ \){i.price} = ₱${i.price * i.qty}\n\n`;
   });
 
   msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
@@ -107,6 +108,8 @@ function placeOrder() {
 
   document.getElementById('orderNumEl').textContent = orderNum;
   openModal('successModal');
+
+  showToast('✅ Order sent to Tisoy Sushi Maki!');
 }
 
 function closeSuccess() {
