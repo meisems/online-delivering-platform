@@ -385,3 +385,9 @@ window.saveEditedItem = saveEditedItem;
 window.closeAdminEditModal = closeAdminEditModal;
 window.toggleItemVisibility = toggleItemVisibility;
 window.deleteItemInline = deleteItemInline;
+
+
+// ==================== INITIALIZE ADMIN ====================
+document.addEventListener('DOMContentLoaded', () => {
+  initAdmin();
+});
