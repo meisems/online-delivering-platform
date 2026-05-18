@@ -96,9 +96,9 @@ function buildSections() {
 function cardHTML(item, catId = null) {
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'tisoy2025';
 
-  const tagHTML = item.tag === 'bestseller' ? `<span class="tag-best">⭐ Best Seller</span>`
-                : item.tag === 'new' ? `<span class="tag-new">✨ New</span>` : '';
-  const spicy = item.tag === 'spicy' ? `<span class="tag-spicy">🌶️ Spicy</span>` : '';
+  const tagHTML = item.tag === 'bestseller' ? `<span class="tag-best">Best Seller</span>`
+                : item.tag === 'new' ? `<span class="tag-new">New</span>` : '';
+  const spicy = item.tag === 'spicy' ? `<span class="tag-spicy">Spicy</span>` : '';
 
     // Image handling - Improved for external URLs
   let imgContent = `<span class="card-emoji-fallback">${item.emoji}</span>`;
@@ -154,7 +154,7 @@ function cardHTML(item, catId = null) {
       <select class="variant-select" id="var-${item.id}" onchange="updateVariantPrice(${item.id},this)">${opts}</select>
       <div class="card-foot">
         <span class="item-price" id="price-${item.id}">${firstPrice ? '₱' + firstPrice : 'Contact us'}</span>
-        <button class="add-btn" onclick="event.stopImmediatePropagation(); addVariantToCart(${item.id},'${safeN}','${item.emoji}')">＋ Add</button>
+        <button class="add-btn" onclick="event.stopImmediatePropagation(); addVariantToCart(${item.id},'${safeN}','${item.emoji}')">＋</button>
       </div>
     </div>
   </div>`;
@@ -169,7 +169,7 @@ function cardHTML(item, catId = null) {
       <p>${item.desc}</p>
       <div class="card-foot">
         <span class="item-price">${displayPrice}</span>
-        <button class="add-btn" onclick="event.stopImmediatePropagation(); addToCart(${item.id},'${item.name.replace(/'/g,"\\'")}',${item.price},'${item.emoji}')">＋ Add</button>
+        <button class="add-btn" onclick="event.stopImmediatePropagation(); addVariantToCart(${item.id},'${safeN}','${item.emoji}')">＋</button>
       </div>
     </div>
   </div>`;
@@ -201,7 +201,7 @@ function setActiveCat(id) {
     return;
   }
   activeCat = id;
-  document.getElementById('secTitle').textContent = cat.emoji + ' ' + cat.label;
+  document.getElementById('secTitle').textContent = cat.label;
   document.getElementById('secDesc').textContent = cat.desc || '';
 
   document.querySelectorAll('.menu-section').forEach(s => s.classList.remove('visible'));
