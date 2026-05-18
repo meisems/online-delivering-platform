@@ -9,8 +9,8 @@ A beautiful, responsive, and fully functional online food ordering website for *
 - **Modern & Responsive Design** – Optimized for desktop and mobile
 - **Interactive Menu** with categories (Best Sellers, Maki, Nigiri, Sets, etc.)
 - **Real-time Shopping Cart** with quantity controls
-- **Multiple Order Types**: Delivery, Pick-up, Dine-in
-- **Fixed Delivery Fee** (₱60)
+- **Multiple Order Types**: Delivery and Pick-up
+- **Fixed Delivery Fee** via Lalamove
 - **Checkout Form** with customer details
 - **Direct Order to Facebook Messenger** – Orders are automatically sent to the business Facebook Page
 - **WhatsApp Backup** option
