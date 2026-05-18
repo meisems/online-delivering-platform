@@ -1,620 +1,574 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="light">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-  <title>Tisoy Sushi Maki – Order Online</title>
+/* ══════════════════════════════════════
+   admin.js — Store Status + Full Inline Menu Editing
+══════════════════════════════════════ */
 
-  <!-- Favicon (inline SVG as data URI) -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%2300A651'/><circle cx='32' cy='32' r='18' fill='%23fff'/><circle cx='32' cy='32' r='12' fill='%231a1a1a'/><circle cx='32' cy='32' r='7' fill='%23E63939'/><circle cx='27' cy='27' r='2.5' fill='%23fff' opacity='.7'/></svg>"/>
+let isAdminMode = false;
+let adminMenu = null;
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
+async function initAdmin() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('admin') !== 'tisoy2025') return;
 
-<!-- ═══ NAVBAR ═══ -->
-<nav class="navbar">
-  <div class="nav-inner">
-    <a href="#" class="logo">
-      <!-- Professional SVG Logo Mark -->
-      <div class="logo-icon">
-        <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="18" cy="18" r="15" fill="white" opacity="0.15"/>
-          <circle cx="18" cy="18" r="10" fill="white" opacity="0.9"/>
-          <circle cx="18" cy="18" r="6" fill="#E63939"/>
-          <circle cx="14.5" cy="14.5" r="2" fill="white" opacity="0.6"/>
-          <!-- Nori wrap lines -->
-          <path d="M8 18 Q18 10 28 18" stroke="white" stroke-width="1.5" fill="none" opacity="0.5"/>
-          <path d="M8 18 Q18 26 28 18" stroke="white" stroke-width="1.5" fill="none" opacity="0.5"/>
-        </svg>
-      </div>
-      <div class="logo-text-wrap">
-        <div class="logo-name">TISOY SUSHI MAKI</div>
-        <div class="logo-sub">Dasmariñas, Cavite</div>
-      </div>
-    </a>
+  console.log('✅ Admin Mode Activated');
+  isAdminMode = true;
+  window.isAdminMode = true;
 
-    <div class="nav-right">
-      <!-- Dark/Light Mode Toggle -->
-      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle dark/light mode" aria-label="Toggle theme">
-        <span class="theme-icon-sun">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-          </svg>
-        </span>
-        <span class="theme-icon-moon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-          </svg>
-        </span>
-      </button>
+  // Show admin buttons
+  const adminControls = document.getElementById('adminControls');
+  if (adminControls) adminControls.style.display = 'block';
 
-      <button class="cart-btn" onclick="openCartDrawer()" id="navCartBtn">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-        </svg>
-        Order
-        <span class="cart-count hidden" id="navCartCount">0</span>
-      </button>
-    </div>
-  </div>
-</nav>
+  // Add .visible class so the fixed-position fabs actually appear
+  const adminFab = document.getElementById('adminFab');
+  const addMenuFab = document.getElementById('addMenuFab');
+  if (adminFab) adminFab.classList.add('visible');
+  if (addMenuFab) addMenuFab.classList.add('visible');
 
-<!-- ═══ STORE STATUS BANNER ═══ -->
-<div class="store-status-bar" id="storeStatusBar">
-  <span class="status-icon" id="storeStatusIcon"></span>
-  <span id="storeStatusMsg"></span>
-  <div class="status-time" id="storeStatusTime"></div>
-</div>
-
-<!-- CLOSED OVERLAY -->
-<div class="closed-overlay" id="closedOverlay">
-  <div class="closed-card">
-    <div class="cc-icon" id="closedIcon">
-      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v6l4 2"/>
-      </svg>
-    </div>
-    <h2 id="closedTitle">We're Closed Right Now</h2>
-    <p id="closedMsg">Sorry, we're not taking orders at this time.</p>
-    <div class="hours-badge">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:5px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      Mon–Sun · 10:00 AM – 9:00 PM
-    </div>
-    <div class="current-ph-time" id="closedCurrentTime"></div>
-    <a class="cc-wa" href="https://wa.me/639916758883?text=Hi%20Tisoy%20Sushi%20Maki!%20I%20have%20an%20inquiry%20%F0%9F%8D%A3" target="_blank">
-      <svg width="16" height="16" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-      Message Us on WhatsApp
-    </a>
-    <button class="cc-dismiss" onclick="dismissClosedOverlay()">Browse Menu (View Only)</button>
-  </div>
-</div>
-
-<!-- PROMO STRIP -->
-<div class="promo-strip">
-  <span class="promo-badge">
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:3px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-    Dasmariñas, Cavite
-  </span>
-  Delivery Fee depends on Lalamove · Fast Service
-  <span class="promo-badge">
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="vertical-align:middle;margin-right:3px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.76a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-    0995 450 8647
-  </span>
-</div>
-
-<!-- ═══ HERO ═══ -->
-<section class="hero">
-  <div class="hero-inner">
-    <div class="hero-left">
-      <div class="hero-badge">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        Verified Page &nbsp;|&nbsp;
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-left:2px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Fresh Daily
-      </div>
-      <h1>Authentic Sushi & Maki<br><span>Delivered Fresh</span><br>to Your Door</h1>
-      <p class="hero-desc">Experience restaurant-quality sushi and maki rolls made with premium ingredients — now available for delivery across Cavite and Manila. Order online in minutes!</p>
-
-      <div class="order-toggle-wrap">
-        <div class="order-toggle-label">How would you like your order?</div>
-        <div class="order-toggle">
-          <button class="toggle-btn active" onclick="setOrderType('delivery',this)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            Delivery
-          </button>
-          <button class="toggle-btn" onclick="setOrderType('pickup',this)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            Pick Up
-          </button>
-        </div>
-      </div>
-
-      <div class="hero-actions">
-        <button class="btn-primary-hero" onclick="document.querySelector('.menu-area').scrollIntoView({behavior:'smooth'})">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-          Order Now
-        </button>
-      </div>
-
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7fddac" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Fresh Sushi Daily</span>
-        </div>
-        <div class="hero-stat">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7fddac" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <span>Cavite & Manila</span>
-        </div>
-        <div class="hero-stat">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7fddac" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          <span>Fast Delivery</span>
-        </div>
-        <div class="hero-stat">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7fddac" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Verified Business</span>
-        </div>
-      </div>
-    </div>
-    <div class="hero-right">
-      <div class="hero-visual-card">
-        <div class="hvc-icon">
-          <svg width="36" height="36" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" fill="rgba(255,255,255,0.12)"/><circle cx="24" cy="24" r="13" fill="rgba(255,255,255,0.85)"/><circle cx="24" cy="24" r="8" fill="#E63939"/><circle cx="20" cy="20" r="3" fill="white" opacity="0.5"/></svg>
-        </div>
-        <div class="hvc-text">
-          <div class="hvc-title">Salmon Roll</div>
-          <div class="hvc-sub">Fresh · Premium</div>
-          <div class="hvc-price">₱280</div>
-        </div>
-      </div>
-      <div class="hero-visual-card">
-        <div class="hvc-icon">
-          <svg width="36" height="36" viewBox="0 0 48 48" fill="none"><rect x="8" y="16" width="32" height="18" rx="9" fill="rgba(255,255,255,0.85)"/><rect x="13" y="20" width="22" height="10" rx="5" fill="#1a1a1a"/><rect x="17" y="22" width="14" height="6" rx="3" fill="#E63939"/></svg>
-        </div>
-        <div class="hvc-text">
-          <div class="hvc-title">Tuna Maki</div>
-          <div class="hvc-sub">Best Seller</div>
-          <div class="hvc-price">₱220</div>
-        </div>
-      </div>
-      <div class="hero-visual-card">
-        <div class="hvc-icon">
-          <svg width="36" height="36" viewBox="0 0 48 48" fill="none"><rect x="6" y="12" width="36" height="26" rx="5" fill="rgba(255,255,255,0.85)"/><rect x="10" y="16" width="28" height="5" rx="2" fill="#1a1a1a" opacity="0.2"/><rect x="10" y="23" width="13" height="5" rx="2" fill="#00A651" opacity="0.5"/><rect x="25" y="23" width="13" height="5" rx="2" fill="#E63939" opacity="0.5"/></svg>
-        </div>
-        <div class="hvc-text">
-          <div class="hvc-title">Bento Set</div>
-          <div class="hvc-sub">Today's Special</div>
-          <div class="hvc-price">₱350</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- Red-blending bottom wave accent -->
-  <div class="hero-wave-accent" aria-hidden="true"></div>
-</section>
-
-<!-- INFO BAR -->
-<div class="info-bar">
-  <div class="info-bar-inner">
-    <div class="info-chip">
-      <span class="ic-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00A651" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      </span>
-      <div><div style="font-size:0.68rem;color:var(--gray)">Location</div><strong>Cityhomes Resortville, Dasmariñas, Cavite</strong></div>
-    </div>
-    <div class="info-divider"></div>
-    <div class="info-chip">
-      <span class="ic-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00A651" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      </span>
-      <div><div style="font-size:0.68rem;color:var(--gray)">Store Hours</div><strong>Mon–Sun · 10:00 AM – 9:00 PM</strong></div>
-    </div>
-    <div class="info-divider"></div>
-    <div class="info-chip">
-      <span class="ic-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00A651" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.76a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-      </span>
-      <div><div style="font-size:0.68rem;color:var(--gray)">Call / Text</div><strong>0995 450 8647</strong></div>
-    </div>
-    <div class="info-divider"></div>
-    <div class="info-chip">
-      <span class="ic-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00A651" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-      </span>
-      <div><div style="font-size:0.68rem;color:var(--gray)">Delivery</div><strong>Cavite &amp; Manila Areas</strong></div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ MAIN ═══ -->
-<div class="main-wrapper">
-
-  <!-- DESKTOP SIDEBAR -->
-  <aside class="cat-sidebar">
-    <div class="cat-sidebar-inner">
-      <div class="cat-sidebar-title">Menu Categories</div>
-      <div id="desktopCats"></div>
-    </div>
-  </aside>
-
-  <!-- MENU AREA -->
-  <main class="menu-area">
-    <div class="search-wrap">
-      <span class="search-icon">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </span>
-      <input 
-        type="text" 
-        id="menuSearch" 
-        class="search-input" 
-        placeholder="Search sushi, maki, rolls..."
-        oninput="searchMenu(this.value)"/>
-      <button class="search-clear hidden" id="searchClear" onclick="clearSearch()">&#x2715;</button>
-    </div>
-    <div class="mobile-cats" id="mobileCats"></div>
-    <div class="section-hd">
-      <h2 id="secTitle">Best Sellers</h2>
-      <p id="secDesc">Our most-ordered sushi and maki rolls</p>
-    </div>
-    <div id="menuSections"></div>
-  </main>
-
-  <!-- DESKTOP CART -->
-  <aside class="cart-sidebar">
-    <div class="cart-box">
-      <div class="cart-hd">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-        <h3>Your Order</h3>
-        <span id="cartOrderType" style="font-size:0.68rem;background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:20px;font-weight:700;flex-shrink:0;">Delivery</span>
-      </div>
-      <div class="cart-bd" id="desktopCartBd"></div>
-      <div style="padding:0 14px 14px;" id="desktopCartSum"></div>
-    </div>
-  </aside>
-</div>
-
-<!-- FLOAT CART (mobile) -->
-<button class="float-cart" id="floatCart" onclick="openCartDrawer()">
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-  View Order
-  <span class="fc-badge" id="fcCount">0</span>
-  <span id="fcTotal">₱0</span>
-</button>
-
-<!-- MOBILE CART DRAWER -->
-<div class="drawer" id="cartDrawer">
-  <div class="drawer-bd" onclick="closeCartDrawer()"></div>
-  <div class="drawer-sheet">
-    <div class="drawer-handle"></div>
-    <div class="drawer-title">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-      Your Order
-    </div>
-    <div id="mobileCartBd"></div>
-    <div id="mobileCartSum"></div>
-  </div>
-</div>
-
-<!-- CHECKOUT MODAL -->
-<div class="overlay" id="checkoutModal">
-  <div class="modal">
-    <div class="modal-hd">
-      <h3>Complete Your Order</h3>
-      <button class="modal-x" onclick="closeModal('checkoutModal')">&#x2715;</button>
-    </div>
-    <div class="modal-bd">
-      <div class="order-mini" id="checkoutSummary"></div>
-      <div class="form-row">
-        <div class="fg"><label>First Name *</label><input id="fname" placeholder="Juan" /></div>
-        <div class="fg"><label>Last Name *</label><input id="lname" placeholder="Dela Cruz" /></div>
-      </div>
-      <div class="fg"><label>Mobile Number *</label><input id="phone" type="tel" placeholder="09XX XXX XXXX" /></div>
-      <div class="fg">
-        <label>Delivery Address *</label>
-        <input type="text" id="deliveryAddress" placeholder="House #, Street, etc." required>
-      </div>
-
-      <label>Barangay / Area *</label>
-      <input type="text" id="barangay" list="barangayList" placeholder="Type or select barangay" required>
-
-      <datalist id="barangayList">
-        <option value="Burol I"><option value="Burol II"><option value="Burol III"><option value="Burol Main">
-        <option value="Datu Esmael"><option value="Emmanuel Bergado I"><option value="Emmanuel Bergado II">
-        <option value="Fatima I"><option value="Fatima II"><option value="Fatima III"><option value="H-2">
-        <option value="Langkaan I"><option value="Langkaan II"><option value="Luzviminda I"><option value="Luzviminda II">
-        <option value="Paliparan I"><option value="Paliparan II"><option value="Paliparan III"><option value="Sabang">
-        <option value="Saint Peter I"><option value="Saint Peter II"><option value="Salawag">
-        <option value="Salitran I"><option value="Salitran II"><option value="Salitran III"><option value="Salitran IV">
-        <option value="Sampaloc I"><option value="Sampaloc II"><option value="Sampaloc III"><option value="Sampaloc IV"><option value="Sampaloc V">
-        <option value="San Agustin I"><option value="San Agustin II"><option value="San Agustin III">
-        <option value="San Andres I"><option value="San Andres II">
-        <option value="San Antonio de Padua I"><option value="San Antonio de Padua II">
-        <option value="San Dionisio"><option value="San Esteban">
-        <option value="San Francisco I"><option value="San Francisco II">
-        <option value="San Isidro Labrador I"><option value="San Isidro Labrador II">
-        <option value="San Jose"><option value="San Juan">
-        <option value="San Lorenzo Ruiz I"><option value="San Lorenzo Ruiz II">
-        <option value="San Luis I"><option value="San Luis II">
-        <option value="San Manuel I"><option value="San Manuel II">
-        <option value="San Mateo"><option value="San Miguel I"><option value="San Miguel II">
-        <option value="San Nicolas I"><option value="San Nicolas II">
-        <option value="San Roque"><option value="San Simon">
-        <option value="Santa Cristina I"><option value="Santa Cristina II">
-        <option value="Santa Cruz I"><option value="Santa Cruz II">
-        <option value="Santa Fe"><option value="Santa Lucia"><option value="Santa Maria">
-        <option value="Santo Cristo"><option value="Santo Niño I"><option value="Santo Niño II">
-        <option value="Victoria Reyes">
-        <option value="Zone I"><option value="Zone I-B"><option value="Zone II"><option value="Zone III"><option value="Zone IV">
-      </datalist>
-
-      <div class="fg">
-        <label>Special Instructions <span style="color:var(--gray);font-weight:600">(optional)</span></label>
-        <textarea id="notes" placeholder="e.g. Extra soy sauce, no wasabi..."></textarea>
-      </div>
-      <div class="fg">
-        <label>Payment Method</label>
-        <div class="pay-grid">
-          <div class="pay-opt sel" onclick="selPay(this,'cod')">
-            <div class="pay-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-            </div>
-            Cash on Delivery
-          </div>
-          <div class="pay-opt" onclick="selPay(this,'gcash')">
-            <div class="pay-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-            </div>
-            GCash
-          </div>
-          <div class="pay-opt" onclick="selPay(this,'maya')">
-            <div class="pay-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            </div>
-            Maya
-          </div>
-          <div class="pay-opt" onclick="selPay(this,'bank')">
-            <div class="pay-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>
-            </div>
-            Bank Transfer
-          </div>
-        </div>
-      </div>
-      <button class="place-btn" onclick="placeOrder()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        Place Order
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- SUCCESS MODAL -->
-<div class="overlay" id="successModal">
-  <div class="modal">
-    <div class="success-body">
-      <div class="s-icon">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#00A651" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>
-      </div>
-      <h2>Order Confirmed!</h2>
-      <p>Salamat! Your sushi order has been received.<br>We'll contact you shortly to confirm.</p>
-      <div class="order-num" id="orderNumEl">#TSM-0001</div>
-      <div class="contact-info">
-        <p>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:4px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.76a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          <strong>0995 450 8647</strong>
-        </p>
-        <p>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="#25D366" style="vertical-align:middle;margin-right:4px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-          WhatsApp: <strong>+63 991 675 8883</strong>
-        </p>
-        <p>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          <strong>bayanileonilo@gmail.com</strong>
-        </p>
-      </div>
-      <p style="font-size:0.78rem;color:var(--gray);">For updates, please save our contact number.<br>Estimated delivery: <strong>30–60 minutes</strong></p>
-      <button class="s-close" onclick="closeSuccess()">Continue Shopping</button>
-    </div>
-  </div>
-</div>
-
-<!-- LOCATION MODAL -->
-<div class="overlay" id="locationModal">
-  <div class="modal">
-    <div class="modal-hd">
-      <h3>Set Your Location</h3>
-      <button class="modal-x" onclick="closeModal('locationModal')">&#x2715;</button>
-    </div>
-    <div class="modal-bd">
-      <div class="fg"><label>Full Delivery Address</label><input id="locInput" placeholder="House No., Street, Barangay..." /></div>
-      <div class="fg">
-        <label>Delivery Area</label>
-        <select id="locArea">
-          <option value="">Select your area...</option>
-          <optgroup label="Dasmariñas, Cavite">
-            <option>Cityhomes Resortville</option><option>Brgy. San Agustin</option>
-            <option>Brgy. Paliparan</option><option>Brgy. Salitran</option>
-          </optgroup>
-          <optgroup label="Other Cavite Areas">
-            <option>Bacoor</option><option>Imus</option><option>General Trias</option>
-          </optgroup>
-          <optgroup label="Manila & Nearby">
-            <option>Las Piñas</option><option>Muntinlupa</option><option>Paranaque</option>
-          </optgroup>
-        </select>
-      </div>
-      <button class="place-btn" onclick="saveLocation()">Save Location</button>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<!-- ADMIN FAB & PANEL -->
-<div id="adminControls" style="display: none;">
-  <div class="admin-fab" id="adminFab" onclick="toggleAdminPanel()" title="Owner Panel - Status & Announcements">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-  </div>
-  <div class="admin-fab add-menu-fab" id="addMenuFab" onclick="showAddMenuModal()" title="Add New Menu Item">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  </div>
-</div>
-<div class="admin-panel" id="adminPanel">
-  <h4>Owner Panel</h4>
-  <div class="admin-toggle-row">
-    <span><span class="admin-status-dot" id="adminDot"></span> Temporarily Closed</span>
-    <div class="toggle-switch" id="adminToggle" onclick="toggleOwnerClosed()"></div>
-  </div>
-  <div class="admin-msg-area" id="adminMsgArea">
-    <label>Custom message for customers:</label>
-    <textarea id="adminMsgInput" placeholder="e.g. Closed today for a family event. Back tomorrow at 10AM!"></textarea>
-  </div>
-  <button class="admin-apply-btn" onclick="applyOwnerStatus()">Apply &amp; Publish</button>
-</div>
-
-<!-- ═══ FOOTER ═══ -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <div class="fb-logo-wrap">
-        <!-- Footer SVG Logo -->
-        <svg width="32" height="32" viewBox="0 0 48 48" fill="none" style="flex-shrink:0">
-          <rect width="48" height="48" rx="10" fill="#00A651"/>
-          <circle cx="24" cy="24" r="14" fill="white" opacity="0.15"/>
-          <circle cx="24" cy="24" r="10" fill="white" opacity="0.9"/>
-          <circle cx="24" cy="24" r="6" fill="#E63939"/>
-          <circle cx="20.5" cy="20.5" r="2" fill="white" opacity="0.6"/>
-        </svg>
-        <div class="fb-logo">TISOY SUSHI <span>MAKI</span></div>
-      </div>
-      <p>Fresh, authentic sushi and maki rolls made daily. Serving Cavite &amp; Manila with love and quality ingredients.</p>
-      <div class="footer-social">
-        <a class="f-social" href="https://www.facebook.com/share/18KwaefxXj/" target="_blank" title="Facebook">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.235 2.686.235v2.97h-1.514c-1.491 0-1.956.93-1.956 1.874v2.25h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
-        </a>
-        <a class="f-social" href="https://wa.me/639916758883" target="_blank" title="WhatsApp">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        </a>
-        <a class="f-social" href="mailto:bayanileonilo@gmail.com" title="Email">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="#EA4335"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 010 19.366V5.457c0-.904.732-1.636 1.636-1.636h.749L12 10.87l9.615-7.049h.749C23.268 3.821 24 4.553 24 5.457z"/></svg>
-        </a>
-      </div>
-    </div>
-    <div class="footer-col">
-      <h4>Contact Us</h4>
-      <p>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px;opacity:.7"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.76a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        0995 450 8647
-      </p>
-      <p>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="#25D366" style="vertical-align:middle;margin-right:5px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        +63 991 675 8883 (WhatsApp)
-      </p>
-      <p>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px;opacity:.7"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        bayanileonilo@gmail.com
-      </p>
-      <p>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px;opacity:.7"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Cityhomes Resortville,<br>&nbsp;&nbsp;&nbsp;&nbsp;Dasmariñas, Cavite 4114
-      </p>
-    </div>
-    <div class="footer-col">
-      <h4>Store Info</h4>
-      <p>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px;opacity:.7"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Mon–Sun: 10:00 AM – 9:00 PM
-      </p>
-      <p>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px;opacity:.7"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-        Delivery: via Lalamove
-      </p>
-      <p>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:5px;opacity:.7"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-        Pick Up available
-      </p>
-      <a href="https://www.facebook.com/share/18KwaefxXj/" target="_blank">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="#1877F2" style="vertical-align:middle;margin-right:5px"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.235 2.686.235v2.97h-1.514c-1.491 0-1.956.93-1.956 1.874v2.25h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
-        Visit our Facebook Page
-      </a>
-    </div>
-  </div>
-  <div class="footer-bottom">© 2025 Tisoy Sushi Maki · Dasmariñas, Cavite · All rights reserved.</div>
-</footer>
-
-<!-- ITEM DETAIL MODAL -->
-<div class="overlay" id="itemModal" style="display: none;">
-  <div class="modal item-detail-modal">
-    <div class="modal-hd">
-      <h3>Item Details</h3>
-      <button class="modal-x" onclick="closeItemModal()">&#x2715;</button>
-    </div>
-    <div class="modal-bd">
-      <img id="modalImage" src="" alt="" class="modal-item-img">
-      <h2 id="modalName"></h2>
-      <p id="modalDesc" class="modal-desc"></p>
-      <div id="modalVariants"></div>
-      <div class="modal-price" id="modalPrice"></div>
-      <button id="modalAddBtn" class="add-btn-large">
-        + Add to Order
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ADMIN EDIT MODAL -->
-<div class="overlay" id="adminEditModal" style="display: none;">
-  <div class="modal admin-edit-modal">
-    <div class="modal-hd">
-      <h3>Edit Item</h3>
-      <button class="modal-x" onclick="closeAdminEditModal()">&#x2715;</button>
-    </div>
-    <div class="modal-bd" id="editModalBody"></div>
-  </div>
-</div>
-
-<!-- ADD MENU MODAL -->
-<div class="overlay" id="addMenuModal" style="display: none;">
-  <div class="modal admin-edit-modal" style="max-width: 500px;">
-    <div class="modal-hd">
-      <h3>Add New Menu Item</h3>
-      <button class="modal-x" onclick="closeAddMenuModal()">&#x2715;</button>
-    </div>
-    <div class="modal-bd" id="addMenuBody"></div>
-  </div>
-</div>
-  
-<!-- ═══ SCRIPTS ═══ -->
-<script src="js/data.js"></script>
-<script src="js/store.js"></script>
-<script src="js/cart.js"></script>
-<script src="js/checkout.js"></script>
-<script src="js/admin.js"></script>
-<script src="js/app.js"></script>
-
-<!-- Theme toggle script (must be after body) -->
-<script>
-  // Initialize theme from localStorage
-  (function() {
-    const saved = localStorage.getItem('tsm-theme') || 'light';
-    document.documentElement.setAttribute('data-theme', saved);
-  })();
-
-  function toggleTheme() {
-    const html = document.documentElement;
-    const current = html.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    localStorage.setItem('tsm-theme', next);
+  // Load menu
+  try {
+    const res = await fetch('/api/menu');
+    const data = await res.json();
+    adminMenu = data && Object.keys(data).length > 0 
+      ? data 
+      : JSON.parse(JSON.stringify(menu || {}));
+  } catch (e) {
+    console.warn('Using local menu data');
+    adminMenu = JSON.parse(JSON.stringify(menu || {}));
   }
-</script>
 
-</body>
-</html>
+  window.adminMenu = adminMenu;
+  if (typeof buildSections === 'function') buildSections();
+}
+
+function checkAdminAccess() {
+  return isAdminMode === true;
+}
+
+// ==================== STORE STATUS ====================
+function toggleAdminPanel() {
+  if (!checkAdminAccess()) return;
+  const panel = document.getElementById('adminPanel');
+  if (panel) panel.classList.toggle('open');
+}
+
+function toggleOwnerClosed() {
+  if (!checkAdminAccess()) return;
+  const tog = document.getElementById('adminToggle');
+  const dot = document.getElementById('adminDot');
+  const area = document.getElementById('adminMsgArea');
+
+  const isOn = tog.classList.toggle('on');
+  dot.classList.toggle('off', isOn);
+  area.classList.toggle('show', isOn);
+}
+
+async function applyOwnerStatus() {
+  if (!checkAdminAccess()) return;
+
+  const isClosed = document.getElementById('adminToggle').classList.contains('on');
+  const msg = document.getElementById('adminMsgInput').value.trim();
+
+  try {
+    await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        store_closed: isClosed ? '1' : '0',
+        store_message: msg || 'We are temporarily unavailable.'
+      })
+    });
+  } catch (e) {
+    showToast('⚠️ Failed to save status');
+  }
+
+  document.getElementById('adminPanel').classList.remove('open');
+  if (typeof checkStoreStatus === 'function') checkStoreStatus();
+  showToast(isClosed ? '🔴 Store is now CLOSED' : '✅ Store is now OPEN');
+}
+
+// ==================== ADMIN ITEM EDITING ====================
+
+function getAdminItem(catId, itemId) {
+  if (!adminMenu || !adminMenu[catId]) return null;
+  return adminMenu[catId].find(item => item.id === itemId);
+}
+
+function editItemInline(catId, itemId) {
+  if (!checkAdminAccess()) return;
+  const item = getAdminItem(catId, itemId);
+  if (!item) return alert("Item not found");
+
+  let html = `
+    <input type="hidden" id="editCatId" value="${catId}">
+    <input type="hidden" id="editItemId" value="${itemId}">
+    
+    <div class="fg">
+      <label>Item Photo</label>
+      <div class="img-tabs">
+        <button type="button" class="img-tab active" onclick="switchImgTab('edit','upload')">⬆️ Upload File</button>
+        <button type="button" class="img-tab" onclick="switchImgTab('edit','link')">🔗 Link URL</button>
+      </div>
+
+      <!-- Upload panel -->
+      <div id="edit-panel-upload" class="img-panel">
+        <div class="img-dropzone" id="edit-dropzone"
+          onclick="document.getElementById('editFileInput').click()"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleImgDrop(event,'edit')">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          <span>Click or drag &amp; drop an image here</span>
+          <small>JPG, PNG, WEBP · max 10 MB</small>
+        </div>
+        <input type="file" id="editFileInput" accept="image/*" style="display:none" onchange="handleImgFile(event,'edit')">
+      </div>
+
+      <!-- Link panel -->
+      <div id="edit-panel-link" class="img-panel" style="display:none;">
+        <input id="editImageUrl" type="text" value="${item.images && item.images[0] ? item.images[0] : ''}" placeholder="https://... or images/filename.jpg" oninput="updateImgPreview('edit',this.value)">
+      </div>
+
+      <!-- Shared preview -->
+      <div id="edit-img-preview" class="img-preview-box">
+        ${item.images && item.images[0]
+          ? `<img src="${item.images[0]}" alt="preview"><button type="button" class="img-clear-btn" onclick="clearImgPreview('edit')">✕ Remove</button>`
+          : `<span class="img-placeholder">No image selected</span>`}
+      </div>
+      <input type="hidden" id="editFinalImage" value="${item.images && item.images[0] ? item.images[0] : ''}">
+    </div>
+
+    <div class="fg">
+      <label>Item Name *</label>
+      <input id="editName" type="text" value="${(item.name || '').replace(/"/g, '&quot;')}">
+    </div>
+    <div class="fg">
+      <label>Description</label>
+      <textarea id="editDesc" rows="3">${(item.desc || '')}</textarea>
+    </div>`;
+
+  if (!item.variants || item.variants.length === 0) {
+    html += `
+      <div class="fg">
+        <label>Price (₱)</label>
+        <input id="editPrice" type="number" value="${item.price || ''}">
+      </div>`;
+  } else {
+    html += `<h4 style="margin:20px 0 12px; color:var(--primary);">Price per Size</h4>`;
+    item.variants.forEach((v, i) => {
+      html += `
+        <div class="fg">
+          <label>${v.size}${v.note ? ` (${v.note})` : ''}</label>
+          <input type="number" class="variant-price-input" data-index="${i}" value="${v.price || ''}">
+        </div>`;
+    });
+  }
+
+  html += `
+    <div class="fg">
+      <label>Item Badge / Category Tag</label>
+      <select id="editTag" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Nunito',sans-serif;font-size:.9rem;background:var(--bg-input);color:var(--text-main);">
+        <option value="" ${!item.tag ? 'selected' : ''}>— None —</option>
+        <option value="bestseller" ${item.tag === 'bestseller' ? 'selected' : ''}>⭐ Best Seller</option>
+        <option value="new" ${item.tag === 'new' ? 'selected' : ''}>✨ New Item</option>
+        <option value="spicy" ${item.tag === 'spicy' ? 'selected' : ''}>🌶️ Spicy</option>
+      </select>
+      <small style="color:var(--text-muted);font-size:.73rem;margin-top:5px;display:block;">
+        <b>Best Seller</b> &amp; <b>New</b> show a green banner (top-left) · <b>Spicy</b> shows a red badge (top-right)
+      </small>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeAdminEditModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveEditedItem()">Save Changes</button>
+    </div>`;
+
+  document.getElementById('editModalBody').innerHTML = html;
+  document.getElementById('adminEditModal').style.display = 'flex';
+}
+
+async function saveEditedItem() {
+  if (!checkAdminAccess()) return;
+  const catId = document.getElementById('editCatId').value;
+  const itemId = parseInt(document.getElementById('editItemId').value);
+  const item = getAdminItem(catId, itemId);
+  if (!item) return alert("Item not found");
+
+  item.name = document.getElementById('editName').value.trim();
+  item.desc = document.getElementById('editDesc').value.trim();
+
+  // Save tag
+  const tagVal = document.getElementById('editTag').value;
+  if (tagVal) { item.tag = tagVal; } else { delete item.tag; }
+
+  // Upload pending file if any, otherwise use the hidden final image value
+  const pendingFile = window._pendingUpload_edit;
+  if (pendingFile) {
+    const uploadedPath = await uploadImageFile(pendingFile);
+    if (uploadedPath) item.images = [uploadedPath];
+    window._pendingUpload_edit = null;
+  } else {
+    const finalImg = document.getElementById('editFinalImage').value.trim();
+    if (finalImg) item.images = [finalImg];
+  }
+
+  if (!item.variants || item.variants.length === 0) {
+    const price = parseInt(document.getElementById('editPrice').value);
+    if (!isNaN(price)) item.price = price;
+  } else {
+    document.querySelectorAll('.variant-price-input').forEach(input => {
+      const index = parseInt(input.dataset.index);
+      const price = parseInt(input.value);
+      if (!isNaN(price) && item.variants[index]) {
+        item.variants[index].price = price;
+      }
+    });
+  }
+
+  await saveAdminMenu();
+  buildSections();
+  closeAdminEditModal();
+  showToast("✅ Changes saved successfully!");
+}
+
+function closeAdminEditModal() {
+  document.getElementById('adminEditModal').style.display = 'none';
+}
+
+async function toggleItemVisibility(catId, itemId) {
+  if (!checkAdminAccess()) return;
+  const item = getAdminItem(catId, itemId);
+  if (!item) return;
+
+  item.available = item.available === false ? true : false;
+  await saveAdminMenu();
+  buildSections();
+}
+
+async function deleteItemInline(catId, itemId) {
+  if (!checkAdminAccess()) return;
+  if (!confirm("Delete this item permanently?")) return;
+
+  if (adminMenu[catId]) {
+    adminMenu[catId] = adminMenu[catId].filter(item => item.id !== itemId);
+    await saveAdminMenu();
+    buildSections();
+    showToast("🗑️ Item deleted");
+  }
+}
+
+async function saveAdminMenu() {
+  if (!checkAdminAccess()) return;
+  try {
+    await fetch('/api/menu', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(adminMenu)
+    });
+  } catch (e) {
+    showToast('⚠️ Failed to save menu');
+    console.error(e);
+  }
+}
+
+// ==================== ADD NEW MENU ITEM ====================
+
+function showAddMenuModal() {
+  if (!checkAdminAccess()) return;
+
+  const html = `
+    <div class="fg">
+      <label>Category *</label>
+      <select id="newCatId">
+        ${categories.map(cat => `<option value="${cat.id}">${cat.emoji} ${cat.label}</option>`).join('')}
+      </select>
+    </div>
+
+    <div class="fg">
+      <label>Item Name *</label>
+      <input id="newName" type="text" placeholder="e.g. Spicy Tuna Maki">
+    </div>
+
+    <div class="fg">
+      <label>Description</label>
+      <textarea id="newDesc" rows="3" placeholder="Short description..."></textarea>
+    </div>
+
+    <div class="fg">
+      <label>Item Photo</label>
+      <div class="img-tabs">
+        <button type="button" class="img-tab active" onclick="switchImgTab('new','upload')">⬆️ Upload File</button>
+        <button type="button" class="img-tab" onclick="switchImgTab('new','link')">🔗 Link URL</button>
+      </div>
+
+      <!-- Upload panel -->
+      <div id="new-panel-upload" class="img-panel">
+        <div class="img-dropzone" id="new-dropzone"
+          onclick="document.getElementById('newFileInput').click()"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleImgDrop(event,'new')">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          <span>Click or drag &amp; drop an image here</span>
+          <small>JPG, PNG, WEBP · max 10 MB</small>
+        </div>
+        <input type="file" id="newFileInput" accept="image/*" style="display:none" onchange="handleImgFile(event,'new')">
+      </div>
+
+      <!-- Link panel -->
+      <div id="new-panel-link" class="img-panel" style="display:none;">
+        <input id="newImageUrl" type="text" placeholder="https://... or images/new-item.jpg" oninput="updateImgPreview('new',this.value)">
+      </div>
+
+      <!-- Shared preview -->
+      <div id="new-img-preview" class="img-preview-box">
+        <span class="img-placeholder">No image selected</span>
+      </div>
+      <input type="hidden" id="newFinalImage" value="">
+    </div>
+
+    <div class="fg">
+      <label>Pricing Type</label>
+      <select id="newPriceType" onchange="toggleVariantFields()">
+        <option value="single">Single Price</option>
+        <option value="variants">Multiple Sizes / Variants</option>
+      </select>
+    </div>
+
+    <div id="singlePriceGroup" class="fg">
+      <label>Price (₱)</label>
+      <input id="newPrice" type="number" placeholder="199">
+    </div>
+
+    <div id="variantsGroup" class="fg" style="display:none;">
+      <h4>Variants (Size + Price)</h4>
+      <div id="variantInputs"></div>
+      <button onclick="addVariantField()" class="btn-secondary" style="margin-top:8px;">+ Add Size/Variant</button>
+    </div>
+
+    <div class="fg">
+      <label>Item Badge / Category Tag</label>
+      <select id="newTag" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Nunito',sans-serif;font-size:.9rem;background:var(--bg-input);color:var(--text-main);">
+        <option value="">— None —</option>
+        <option value="bestseller">⭐ Best Seller</option>
+        <option value="new">✨ New Item</option>
+        <option value="spicy">🌶️ Spicy</option>
+      </select>
+      <small style="color:var(--text-muted);font-size:.73rem;margin-top:5px;display:block;">
+        <b>Best Seller</b> &amp; <b>New</b> show a green banner (top-left) · <b>Spicy</b> shows a red badge (top-right)
+      </small>
+    </div>
+
+    <div class="modal-actions" style="margin-top:20px;">
+      <button class="btn-secondary" onclick="closeAddMenuModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveNewMenuItem()">✅ Add Item</button>
+    </div>
+  `;
+
+  document.getElementById('addMenuBody').innerHTML = html;
+  document.getElementById('addMenuModal').style.display = 'flex';
+  addVariantField();
+}
+
+function toggleVariantFields() {
+  const type = document.getElementById('newPriceType').value;
+  document.getElementById('singlePriceGroup').style.display = type === 'single' ? 'block' : 'none';
+  document.getElementById('variantsGroup').style.display = type === 'variants' ? 'block' : 'none';
+}
+
+let variantCounter = 0;
+
+function addVariantField() {
+  variantCounter++;
+  const container = document.getElementById('variantInputs');
+  const div = document.createElement('div');
+  div.className = 'fg';
+  div.style.marginBottom = '8px';
+  div.innerHTML = `
+    <div style="display:flex; gap:8px;">
+      <input type="text" placeholder="Size (e.g. Small)" class="variant-size" style="flex:1;">
+      <input type="number" placeholder="Price" class="variant-price" style="width:100px;">
+      <button onclick="this.parentElement.parentElement.remove()" class="btn-secondary" style="padding:0 10px;">×</button>
+    </div>
+  `;
+  container.appendChild(div);
+}
+
+function closeAddMenuModal() {
+  document.getElementById('addMenuModal').style.display = 'none';
+  variantCounter = 0;
+}
+
+async function saveNewMenuItem() {
+  if (!checkAdminAccess() || !window.adminMenu) return;
+
+  const catId = document.getElementById('newCatId').value;
+  const name = document.getElementById('newName').value.trim();
+  const desc = document.getElementById('newDesc').value.trim();
+
+  if (!name || !catId) {
+    alert("Name and Category are required!");
+    return;
+  }
+
+  // Resolve image: upload file if pending, otherwise use the hidden field
+  let imageUrl = '';
+  const pendingFile = window._pendingUpload_new;
+  if (pendingFile) {
+    const uploadedPath = await uploadImageFile(pendingFile);
+    if (uploadedPath) imageUrl = uploadedPath;
+    window._pendingUpload_new = null;
+  } else {
+    imageUrl = document.getElementById('newFinalImage').value.trim();
+  }
+
+  let newItem = {
+    id: Date.now(),
+    name: name,
+    desc: desc || '',
+    emoji: '🍣',
+    images: imageUrl ? [imageUrl] : []
+  };
+
+  // Save tag if selected
+  const newTag = document.getElementById('newTag').value;
+  if (newTag) newItem.tag = newTag;
+
+  const priceType = document.getElementById('newPriceType').value;
+
+  if (priceType === 'single') {
+    const price = parseInt(document.getElementById('newPrice').value) || 0;
+    newItem.price = price;
+  } else {
+    const sizes = [];
+    document.querySelectorAll('#variantInputs > div').forEach(div => {
+      const sizeInput = div.querySelector('.variant-size');
+      const priceInput = div.querySelector('.variant-price');
+      if (sizeInput && priceInput) {
+        const size = sizeInput.value.trim();
+        const price = parseInt(priceInput.value) || 0;
+        if (size) sizes.push({ size, price });
+      }
+    });
+    if (sizes.length === 0) {
+      alert("Add at least one variant!");
+      return;
+    }
+    newItem.variants = sizes;
+  }
+
+  if (!window.adminMenu[catId]) window.adminMenu[catId] = [];
+  window.adminMenu[catId].push(newItem);
+
+  await saveAdminMenu();
+  buildSections();
+  closeAddMenuModal();
+  showToast(`✅ New item "${name}" added!`);
+}
+
+// ==================== IMAGE UPLOAD HELPERS ====================
+
+/** Switch between Upload / Link tabs in a modal (prefix = 'edit' or 'new') */
+function switchImgTab(prefix, tab) {
+  document.getElementById(`${prefix}-panel-upload`).style.display = tab === 'upload' ? 'block' : 'none';
+  document.getElementById(`${prefix}-panel-link`).style.display  = tab === 'link'   ? 'block' : 'none';
+  document.querySelectorAll(`#${prefix === 'edit' ? 'adminEditModal' : 'addMenuModal'} .img-tab`)
+    .forEach(btn => btn.classList.toggle('active', btn.textContent.toLowerCase().includes(tab === 'upload' ? 'upload' : 'link')));
+}
+
+/** Handle file chosen via the <input type="file"> */
+function handleImgFile(event, prefix) {
+  const file = event.target.files[0];
+  if (!file) return;
+  _storeImgFile(prefix, file);
+}
+
+/** Handle file dropped onto the dropzone */
+function handleImgDrop(event, prefix) {
+  event.preventDefault();
+  document.getElementById(`${prefix}-dropzone`).classList.remove('drag-over');
+  const file = event.dataTransfer.files[0];
+  if (!file || !file.type.startsWith('image/')) return showToast('⚠️ Please drop an image file');
+  _storeImgFile(prefix, file);
+}
+
+/** Store the pending file and show preview */
+function _storeImgFile(prefix, file) {
+  // store on window so save functions can grab it
+  window[`_pendingUpload_${prefix}`] = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    _showImgPreview(prefix, e.target.result, file.name);
+    document.getElementById(`${prefix}FinalImage`).value = ''; // will be set after upload
+  };
+  reader.readAsDataURL(file);
+}
+
+/** Called when URL input changes */
+function updateImgPreview(prefix, url) {
+  window[`_pendingUpload_${prefix}`] = null; // no file, just a URL
+  document.getElementById(`${prefix}FinalImage`).value = url;
+  if (url) _showImgPreview(prefix, url, '');
+  else _clearPreviewBox(prefix);
+}
+
+function _showImgPreview(prefix, src, filename) {
+  const box = document.getElementById(`${prefix}-img-preview`);
+  box.innerHTML = `
+    <img src="${src}" alt="preview" onerror="this.parentElement.innerHTML='<span class=\\'img-placeholder\\'>⚠️ Could not load image</span>'">
+    ${filename ? `<div class="img-filename">${filename}</div>` : ''}
+    <button type="button" class="img-clear-btn" onclick="clearImgPreview('${prefix}')">✕ Remove</button>
+  `;
+}
+
+function clearImgPreview(prefix) {
+  window[`_pendingUpload_${prefix}`] = null;
+  const finalEl = document.getElementById(`${prefix}FinalImage`);
+  if (finalEl) finalEl.value = '';
+  const urlEl = document.getElementById(`${prefix}ImageUrl`);
+  if (urlEl) urlEl.value = '';
+  _clearPreviewBox(prefix);
+}
+
+function _clearPreviewBox(prefix) {
+  document.getElementById(`${prefix}-img-preview`).innerHTML = '<span class="img-placeholder">No image selected</span>';
+}
+
+/** Actually POST the file to /api/upload and return the saved path */
+async function uploadImageFile(file) {
+  try {
+    showToast('⬆️ Uploading image…');
+    const fd = new FormData();
+    fd.append('image', file);
+    const res = await fetch('/api/upload', { method: 'POST', body: fd });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    showToast('✅ Image uploaded!');
+    return data.path;
+  } catch (err) {
+    console.error('Upload error:', err);
+    showToast('⚠️ Image upload failed — check server logs');
+    return null;
+  }
+}
+
+// ==================== GLOBAL ACCESS & INIT ====================
+window.initAdmin = initAdmin;
+window.toggleAdminPanel = toggleAdminPanel;
+window.toggleOwnerClosed = toggleOwnerClosed;
+window.applyOwnerStatus = applyOwnerStatus;
+window.showAddMenuModal = showAddMenuModal;
+window.closeAddMenuModal = closeAddMenuModal;
+window.saveNewMenuItem = saveNewMenuItem;
+window.addVariantField = addVariantField;
+window.toggleVariantFields = toggleVariantFields;
+window.editItemInline = editItemInline;
+window.saveEditedItem = saveEditedItem;
+window.closeAdminEditModal = closeAdminEditModal;
+window.toggleItemVisibility = toggleItemVisibility;
+window.deleteItemInline = deleteItemInline;
+window.switchImgTab = switchImgTab;
+window.handleImgFile = handleImgFile;
+window.handleImgDrop = handleImgDrop;
+window.updateImgPreview = updateImgPreview;
+window.clearImgPreview = clearImgPreview;
+
+document.addEventListener('DOMContentLoaded', initAdmin);
