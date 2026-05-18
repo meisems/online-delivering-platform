@@ -138,6 +138,19 @@ function editItemInline(catId, itemId) {
   }
 
   html += `
+    <div class="fg">
+      <label>Item Badge / Category Tag</label>
+      <select id="editTag" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Nunito',sans-serif;font-size:.9rem;background:var(--bg-input);color:var(--text-main);">
+        <option value="" ${!item.tag ? 'selected' : ''}>— None —</option>
+        <option value="bestseller" ${item.tag === 'bestseller' ? 'selected' : ''}>⭐ Best Seller</option>
+        <option value="new" ${item.tag === 'new' ? 'selected' : ''}>✨ New Item</option>
+        <option value="spicy" ${item.tag === 'spicy' ? 'selected' : ''}>🌶️ Spicy</option>
+      </select>
+      <small style="color:var(--text-muted);font-size:.73rem;margin-top:5px;display:block;">
+        <b>Best Seller</b> &amp; <b>New</b> show a green banner (top-left) · <b>Spicy</b> shows a red badge (top-right)
+      </small>
+    </div>
+
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeAdminEditModal()">Cancel</button>
       <button class="btn-primary" onclick="saveEditedItem()">Save Changes</button>
@@ -156,6 +169,14 @@ async function saveEditedItem() {
 
   item.name = document.getElementById('editName').value.trim();
   item.desc = document.getElementById('editDesc').value.trim();
+
+  // Save tag
+  const tagVal = document.getElementById('editTag').value;
+  if (tagVal) {
+    item.tag = tagVal;
+  } else {
+    delete item.tag;
+  }
 
   const newImageUrl = document.getElementById('editImageUrl').value.trim();
   if (newImageUrl) item.images = [newImageUrl];
@@ -267,6 +288,19 @@ function showAddMenuModal() {
       <button onclick="addVariantField()" class="btn-secondary" style="margin-top:8px;">+ Add Size/Variant</button>
     </div>
 
+    <div class="fg">
+      <label>Item Badge / Category Tag</label>
+      <select id="newTag" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Nunito',sans-serif;font-size:.9rem;background:var(--bg-input);color:var(--text-main);">
+        <option value="">— None —</option>
+        <option value="bestseller">⭐ Best Seller</option>
+        <option value="new">✨ New Item</option>
+        <option value="spicy">🌶️ Spicy</option>
+      </select>
+      <small style="color:var(--text-muted);font-size:.73rem;margin-top:5px;display:block;">
+        <b>Best Seller</b> &amp; <b>New</b> show a green banner (top-left) · <b>Spicy</b> shows a red badge (top-right)
+      </small>
+    </div>
+
     <div class="modal-actions" style="margin-top:20px;">
       <button class="btn-secondary" onclick="closeAddMenuModal()">Cancel</button>
       <button class="btn-primary" onclick="saveNewMenuItem()">✅ Add Item</button>
@@ -327,6 +361,10 @@ async function saveNewMenuItem() {
     emoji: '🍣',
     images: imageUrl ? [imageUrl] : []
   };
+
+  // Save tag if selected
+  const newTag = document.getElementById('newTag').value;
+  if (newTag) newItem.tag = newTag;
 
   const priceType = document.getElementById('newPriceType').value;
 
