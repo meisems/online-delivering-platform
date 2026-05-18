@@ -123,6 +123,7 @@ function cardHTML(item, catId = null) {
   }
 
   const cardClick = `onclick="showItemModalById(${item.id})" style="cursor:pointer"`;
+  const safeN = item.name.replace(/'/g,"\\'");
 
   let adminControls = '';
   if (isAdmin) {
@@ -143,7 +144,6 @@ function cardHTML(item, catId = null) {
     const opts = item.variants.map((v, i) =>
       `<option value="${i}" data-price="${v.price}">${v.size}${v.note ? ' · ' + v.note : ''} — ${v.price ? '₱' + v.price : 'Contact us'}</option>`
     ).join('');
-    const safeN = item.name.replace(/'/g,"\\'");
 
     return `
   <div class="menu-card" ${cardClick}>
@@ -169,7 +169,7 @@ function cardHTML(item, catId = null) {
       <p>${item.desc}</p>
       <div class="card-foot">
         <span class="item-price">${displayPrice}</span>
-        <button class="add-btn" onclick="event.stopImmediatePropagation(); addVariantToCart(${item.id},'${safeN}','${item.emoji}')">＋</button>
+        <button class="add-btn" onclick="event.stopImmediatePropagation(); addToCart(${item.id},'${safeN}',${item.price},'${item.emoji}')">＋</button>
       </div>
     </div>
   </div>`;
