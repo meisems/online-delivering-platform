@@ -2,7 +2,8 @@
 
 A beautiful, responsive, and fully functional online food ordering website for **Tisoy Sushi Maki** — built with pure HTML, CSS, and JavaScript.
 
-![Preview](https://via.placeholder.com/800x400?text=Tisoy+Sushi+Maki+Preview) <!-- Replace with actual screenshot later -->
+![Preview](![Uploading Screenshot 2026-05-18 143205.png…]()
+) <!-- Replace with actual screenshot later -->
 
 ## ✨ Features
 
