@@ -17,6 +17,12 @@ async function initAdmin() {
   const adminControls = document.getElementById('adminControls');
   if (adminControls) adminControls.style.display = 'block';
 
+  // Add .visible class so the fixed-position fabs actually appear
+  const adminFab = document.getElementById('adminFab');
+  const addMenuFab = document.getElementById('addMenuFab');
+  if (adminFab) adminFab.classList.add('visible');
+  if (addMenuFab) addMenuFab.classList.add('visible');
+
   // Load menu
   try {
     const res = await fetch('/api/menu');
