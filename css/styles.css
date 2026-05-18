@@ -97,9 +97,9 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-page);color:var(--text-
 .promo-badge{background:rgba(255,255,255,.2);color:#fff;padding:3px 12px;border-radius:20px;font-size:.72rem;border:1px solid rgba(255,255,255,.3);display:inline-flex;align-items:center;gap:3px}
 
 /* ══ HERO ══ */
-.hero{background:linear-gradient(130deg,#003d1f 0%,#005c2c 45%,#007a3a 100%);padding:52px 24px 64px;color:#fff;position:relative;overflow:hidden}
+.hero{background:radial-gradient(ellipse 100% 60% at 50% 120%,rgba(220,60,50,.55) 0%,rgba(200,50,40,.28) 32%,transparent 62%),linear-gradient(130deg,#003d1f 0%,#005c2c 45%,#007a3a 100%);padding:52px 24px 64px;color:#fff;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;opacity:.04;background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:28px 28px}
-.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:48px;background:var(--bg-page);clip-path:ellipse(52% 100% at 50% 100%);transition:background .3s}
+.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:56px;background:var(--bg-page);clip-path:ellipse(52% 100% at 50% 100%);transition:background .3s}
 .hero-inner{max-width:1340px;margin:0 auto;position:relative;z-index:1;display:flex;align-items:center;gap:48px;justify-content:space-between}
 .hero-left{max-width:580px}
 .hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:30px;padding:6px 16px;font-weight:800;font-size:.74rem;letter-spacing:.4px;margin-bottom:18px;color:#d4f5e6}
@@ -122,6 +122,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-page);color:var(--text-
 .hero-visual-card:nth-child(2){animation-delay:.8s}
 .hero-visual-card:nth-child(3){animation-delay:1.6s}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.hero-glow{position:absolute;bottom:-60px;left:50%;transform:translateX(-50%);width:85%;height:320px;background:radial-gradient(ellipse at 50% 80%,rgba(230,60,45,.38) 0%,rgba(210,50,40,.18) 40%,transparent 72%);pointer-events:none;z-index:0;border-radius:50%}
 .hvc-icon{flex-shrink:0}
 .hvc-title{font-weight:900;font-size:.92rem}
 .hvc-sub{font-size:.72rem;opacity:.75;margin-top:1px}

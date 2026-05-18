@@ -2,16 +2,15 @@
 
 A beautiful, responsive, and fully functional online food ordering website for **Tisoy Sushi Maki** — built with pure HTML, CSS, and JavaScript.
 
-![Preview](![Uploading Screenshot 2026-05-18 143205.png…]()
-) <!-- Replace with actual screenshot later -->
+![Preview](https://via.placeholder.com/800x400?text=Tisoy+Sushi+Maki+Preview) <!-- Replace with actual screenshot later -->
 
 ## ✨ Features
 
 - **Modern & Responsive Design** – Optimized for desktop and mobile
 - **Interactive Menu** with categories (Best Sellers, Maki, Nigiri, Sets, etc.)
 - **Real-time Shopping Cart** with quantity controls
-- **Multiple Order Types**: Delivery and Pick-up
-- **Fixed Delivery Fee** via Lalamove
+- **Multiple Order Types**: Delivery, Pick-up, Dine-in
+- **Fixed Delivery Fee** (₱60)
 - **Checkout Form** with customer details
 - **Direct Order to Facebook Messenger** – Orders are automatically sent to the business Facebook Page
 - **WhatsApp Backup** option
