@@ -102,13 +102,38 @@ function editItemInline(catId, itemId) {
     <input type="hidden" id="editItemId" value="${itemId}">
     
     <div class="fg">
-      <label>Image URL</label>
-      <input id="editImageUrl" type="text" value="${item.images && item.images[0] ? item.images[0] : ''}" placeholder="images/filename.jpg or full URL">
-      <div id="imagePreview" style="margin-top:10px; text-align:center;">
-        ${item.images && item.images[0] ? 
-          `<img src="${item.images[0]}" style="max-height:180px; max-width:100%; border-radius:12px; border:1px solid #ddd;">` : 
-          '<p style="color:#999;">No image yet</p>'}
+      <label>Item Photo</label>
+      <div class="img-tabs">
+        <button type="button" class="img-tab active" onclick="switchImgTab('edit','upload')">⬆️ Upload File</button>
+        <button type="button" class="img-tab" onclick="switchImgTab('edit','link')">🔗 Link URL</button>
       </div>
+
+      <!-- Upload panel -->
+      <div id="edit-panel-upload" class="img-panel">
+        <div class="img-dropzone" id="edit-dropzone"
+          onclick="document.getElementById('editFileInput').click()"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleImgDrop(event,'edit')">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          <span>Click or drag &amp; drop an image here</span>
+          <small>JPG, PNG, WEBP · max 10 MB</small>
+        </div>
+        <input type="file" id="editFileInput" accept="image/*" style="display:none" onchange="handleImgFile(event,'edit')">
+      </div>
+
+      <!-- Link panel -->
+      <div id="edit-panel-link" class="img-panel" style="display:none;">
+        <input id="editImageUrl" type="text" value="${item.images && item.images[0] ? item.images[0] : ''}" placeholder="https://... or images/filename.jpg" oninput="updateImgPreview('edit',this.value)">
+      </div>
+
+      <!-- Shared preview -->
+      <div id="edit-img-preview" class="img-preview-box">
+        ${item.images && item.images[0]
+          ? `<img src="${item.images[0]}" alt="preview"><button type="button" class="img-clear-btn" onclick="clearImgPreview('edit')">✕ Remove</button>`
+          : `<span class="img-placeholder">No image selected</span>`}
+      </div>
+      <input type="hidden" id="editFinalImage" value="${item.images && item.images[0] ? item.images[0] : ''}">
     </div>
 
     <div class="fg">
@@ -172,14 +197,18 @@ async function saveEditedItem() {
 
   // Save tag
   const tagVal = document.getElementById('editTag').value;
-  if (tagVal) {
-    item.tag = tagVal;
-  } else {
-    delete item.tag;
-  }
+  if (tagVal) { item.tag = tagVal; } else { delete item.tag; }
 
-  const newImageUrl = document.getElementById('editImageUrl').value.trim();
-  if (newImageUrl) item.images = [newImageUrl];
+  // Upload pending file if any, otherwise use the hidden final image value
+  const pendingFile = window._pendingUpload_edit;
+  if (pendingFile) {
+    const uploadedPath = await uploadImageFile(pendingFile);
+    if (uploadedPath) item.images = [uploadedPath];
+    window._pendingUpload_edit = null;
+  } else {
+    const finalImg = document.getElementById('editFinalImage').value.trim();
+    if (finalImg) item.images = [finalImg];
+  }
 
   if (!item.variants || item.variants.length === 0) {
     const price = parseInt(document.getElementById('editPrice').value);
@@ -264,9 +293,36 @@ function showAddMenuModal() {
     </div>
 
     <div class="fg">
-      <label>Image URL / Path</label>
-      <input id="newImageUrl" type="text" placeholder="images/new-item.jpg or full https:// url">
-      <div id="newImagePreview" style="margin-top:10px; text-align:center; min-height:100px;"></div>
+      <label>Item Photo</label>
+      <div class="img-tabs">
+        <button type="button" class="img-tab active" onclick="switchImgTab('new','upload')">⬆️ Upload File</button>
+        <button type="button" class="img-tab" onclick="switchImgTab('new','link')">🔗 Link URL</button>
+      </div>
+
+      <!-- Upload panel -->
+      <div id="new-panel-upload" class="img-panel">
+        <div class="img-dropzone" id="new-dropzone"
+          onclick="document.getElementById('newFileInput').click()"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleImgDrop(event,'new')">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          <span>Click or drag &amp; drop an image here</span>
+          <small>JPG, PNG, WEBP · max 10 MB</small>
+        </div>
+        <input type="file" id="newFileInput" accept="image/*" style="display:none" onchange="handleImgFile(event,'new')">
+      </div>
+
+      <!-- Link panel -->
+      <div id="new-panel-link" class="img-panel" style="display:none;">
+        <input id="newImageUrl" type="text" placeholder="https://... or images/new-item.jpg" oninput="updateImgPreview('new',this.value)">
+      </div>
+
+      <!-- Shared preview -->
+      <div id="new-img-preview" class="img-preview-box">
+        <span class="img-placeholder">No image selected</span>
+      </div>
+      <input type="hidden" id="newFinalImage" value="">
     </div>
 
     <div class="fg">
@@ -347,11 +403,21 @@ async function saveNewMenuItem() {
   const catId = document.getElementById('newCatId').value;
   const name = document.getElementById('newName').value.trim();
   const desc = document.getElementById('newDesc').value.trim();
-  const imageUrl = document.getElementById('newImageUrl').value.trim();
 
   if (!name || !catId) {
     alert("Name and Category are required!");
     return;
+  }
+
+  // Resolve image: upload file if pending, otherwise use the hidden field
+  let imageUrl = '';
+  const pendingFile = window._pendingUpload_new;
+  if (pendingFile) {
+    const uploadedPath = await uploadImageFile(pendingFile);
+    if (uploadedPath) imageUrl = uploadedPath;
+    window._pendingUpload_new = null;
+  } else {
+    imageUrl = document.getElementById('newFinalImage').value.trim();
   }
 
   let newItem = {
@@ -398,6 +464,92 @@ async function saveNewMenuItem() {
   showToast(`✅ New item "${name}" added!`);
 }
 
+// ==================== IMAGE UPLOAD HELPERS ====================
+
+/** Switch between Upload / Link tabs in a modal (prefix = 'edit' or 'new') */
+function switchImgTab(prefix, tab) {
+  document.getElementById(`${prefix}-panel-upload`).style.display = tab === 'upload' ? 'block' : 'none';
+  document.getElementById(`${prefix}-panel-link`).style.display  = tab === 'link'   ? 'block' : 'none';
+  document.querySelectorAll(`#${prefix === 'edit' ? 'adminEditModal' : 'addMenuModal'} .img-tab`)
+    .forEach(btn => btn.classList.toggle('active', btn.textContent.toLowerCase().includes(tab === 'upload' ? 'upload' : 'link')));
+}
+
+/** Handle file chosen via the <input type="file"> */
+function handleImgFile(event, prefix) {
+  const file = event.target.files[0];
+  if (!file) return;
+  _storeImgFile(prefix, file);
+}
+
+/** Handle file dropped onto the dropzone */
+function handleImgDrop(event, prefix) {
+  event.preventDefault();
+  document.getElementById(`${prefix}-dropzone`).classList.remove('drag-over');
+  const file = event.dataTransfer.files[0];
+  if (!file || !file.type.startsWith('image/')) return showToast('⚠️ Please drop an image file');
+  _storeImgFile(prefix, file);
+}
+
+/** Store the pending file and show preview */
+function _storeImgFile(prefix, file) {
+  // store on window so save functions can grab it
+  window[`_pendingUpload_${prefix}`] = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    _showImgPreview(prefix, e.target.result, file.name);
+    document.getElementById(`${prefix}FinalImage`).value = ''; // will be set after upload
+  };
+  reader.readAsDataURL(file);
+}
+
+/** Called when URL input changes */
+function updateImgPreview(prefix, url) {
+  window[`_pendingUpload_${prefix}`] = null; // no file, just a URL
+  document.getElementById(`${prefix}FinalImage`).value = url;
+  if (url) _showImgPreview(prefix, url, '');
+  else _clearPreviewBox(prefix);
+}
+
+function _showImgPreview(prefix, src, filename) {
+  const box = document.getElementById(`${prefix}-img-preview`);
+  box.innerHTML = `
+    <img src="${src}" alt="preview" onerror="this.parentElement.innerHTML='<span class=\\'img-placeholder\\'>⚠️ Could not load image</span>'">
+    ${filename ? `<div class="img-filename">${filename}</div>` : ''}
+    <button type="button" class="img-clear-btn" onclick="clearImgPreview('${prefix}')">✕ Remove</button>
+  `;
+}
+
+function clearImgPreview(prefix) {
+  window[`_pendingUpload_${prefix}`] = null;
+  const finalEl = document.getElementById(`${prefix}FinalImage`);
+  if (finalEl) finalEl.value = '';
+  const urlEl = document.getElementById(`${prefix}ImageUrl`);
+  if (urlEl) urlEl.value = '';
+  _clearPreviewBox(prefix);
+}
+
+function _clearPreviewBox(prefix) {
+  document.getElementById(`${prefix}-img-preview`).innerHTML = '<span class="img-placeholder">No image selected</span>';
+}
+
+/** Actually POST the file to /api/upload and return the saved path */
+async function uploadImageFile(file) {
+  try {
+    showToast('⬆️ Uploading image…');
+    const fd = new FormData();
+    fd.append('image', file);
+    const res = await fetch('/api/upload', { method: 'POST', body: fd });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    showToast('✅ Image uploaded!');
+    return data.path;
+  } catch (err) {
+    console.error('Upload error:', err);
+    showToast('⚠️ Image upload failed — check server logs');
+    return null;
+  }
+}
+
 // ==================== GLOBAL ACCESS & INIT ====================
 window.initAdmin = initAdmin;
 window.toggleAdminPanel = toggleAdminPanel;
@@ -413,5 +565,10 @@ window.saveEditedItem = saveEditedItem;
 window.closeAdminEditModal = closeAdminEditModal;
 window.toggleItemVisibility = toggleItemVisibility;
 window.deleteItemInline = deleteItemInline;
+window.switchImgTab = switchImgTab;
+window.handleImgFile = handleImgFile;
+window.handleImgDrop = handleImgDrop;
+window.updateImgPreview = updateImgPreview;
+window.clearImgPreview = clearImgPreview;
 
 document.addEventListener('DOMContentLoaded', initAdmin);

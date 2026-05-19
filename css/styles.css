@@ -447,3 +447,21 @@ footer{background:#111827;color:rgba(255,255,255,.72);padding:40px 24px 28px;mar
   .menu-grid{grid-template-columns:1fr 1fr;gap:8px}
   .menu-card-img{height:108px}
 }
+
+/* ══ ADMIN IMAGE PICKER WIDGET ══ */
+.img-tabs{display:flex;gap:6px;margin-bottom:10px}
+.img-tab{flex:1;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-input);color:var(--text-muted);font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .18s}
+.img-tab.active{border-color:var(--primary);background:var(--primary-bg);color:var(--primary)}
+.img-tab:hover:not(.active){border-color:var(--primary);color:var(--primary)}
+
+.img-dropzone{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:24px 16px;text-align:center;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text-muted);background:var(--bg-input)}
+.img-dropzone:hover,.img-dropzone.drag-over{border-color:var(--primary);background:var(--primary-bg);color:var(--primary)}
+.img-dropzone span{font-size:.86rem;font-weight:700}
+.img-dropzone small{font-size:.72rem;opacity:.75}
+
+.img-preview-box{margin-top:12px;border-radius:var(--radius-sm);border:1.5px solid var(--border);overflow:hidden;background:var(--bg-input);min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.img-preview-box img{width:100%;max-height:200px;object-fit:cover;display:block}
+.img-placeholder{font-size:.8rem;color:var(--text-muted);padding:18px;font-weight:600}
+.img-filename{font-size:.72rem;color:var(--text-muted);padding:4px 10px;background:var(--bg-card);width:100%;text-align:center;border-top:1px solid var(--border);word-break:break-all}
+.img-clear-btn{display:block;width:100%;padding:7px;background:var(--accent-bg);color:var(--accent);border:none;border-top:1px solid var(--border);font-family:'Nunito',sans-serif;font-weight:800;font-size:.78rem;cursor:pointer;transition:background .15s}
+.img-clear-btn:hover{background:var(--accent);color:#fff}
