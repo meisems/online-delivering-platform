@@ -199,16 +199,9 @@ async function saveEditedItem() {
   const tagVal = document.getElementById('editTag').value;
   if (tagVal) { item.tag = tagVal; } else { delete item.tag; }
 
-  // Upload pending file if any, otherwise use the hidden final image value
-  const pendingFile = window._pendingUpload_edit;
-  if (pendingFile) {
-    const uploadedPath = await uploadImageFile(pendingFile);
-    if (uploadedPath) item.images = [uploadedPath];
-    window._pendingUpload_edit = null;
-  } else {
-    const finalImg = document.getElementById('editFinalImage').value.trim();
-    if (finalImg) item.images = [finalImg];
-  }
+  // Image base64/URL is already stored in the hidden field by _storeImgFile or updateImgPreview
+  const finalImg = document.getElementById('editFinalImage').value.trim();
+  if (finalImg) item.images = [finalImg];
 
   if (!item.variants || item.variants.length === 0) {
     const price = parseInt(document.getElementById('editPrice').value);
@@ -409,16 +402,8 @@ async function saveNewMenuItem() {
     return;
   }
 
-  // Resolve image: upload file if pending, otherwise use the hidden field
-  let imageUrl = '';
-  const pendingFile = window._pendingUpload_new;
-  if (pendingFile) {
-    const uploadedPath = await uploadImageFile(pendingFile);
-    if (uploadedPath) imageUrl = uploadedPath;
-    window._pendingUpload_new = null;
-  } else {
-    imageUrl = document.getElementById('newFinalImage').value.trim();
-  }
+  // Image base64/URL is already stored in the hidden field by _storeImgFile or updateImgPreview
+  const imageUrl = document.getElementById('newFinalImage').value.trim();
 
   let newItem = {
     id: Date.now(),
@@ -490,21 +475,46 @@ function handleImgDrop(event, prefix) {
   _storeImgFile(prefix, file);
 }
 
-/** Store the pending file and show preview */
+/** Store the pending file — read as base64 immediately and store in the hidden field */
 function _storeImgFile(prefix, file) {
-  // store on window so save functions can grab it
-  window[`_pendingUpload_${prefix}`] = file;
+  if (file.size > 2 * 1024 * 1024) {
+    // Resize/compress large images before storing as base64
+    _resizeAndStore(prefix, file);
+  } else {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const dataUrl = e.target.result;
+      document.getElementById(`${prefix}FinalImage`).value = dataUrl;
+      _showImgPreview(prefix, dataUrl, file.name);
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+/** Resize image to max 800px wide before base64 encoding to keep MongoDB doc size sane */
+function _resizeAndStore(prefix, file) {
   const reader = new FileReader();
   reader.onload = e => {
-    _showImgPreview(prefix, e.target.result, file.name);
-    document.getElementById(`${prefix}FinalImage`).value = ''; // will be set after upload
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 800;
+      let w = img.width, h = img.height;
+      if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      document.getElementById(`${prefix}FinalImage`).value = dataUrl;
+      _showImgPreview(prefix, dataUrl, file.name);
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
 /** Called when URL input changes */
 function updateImgPreview(prefix, url) {
-  window[`_pendingUpload_${prefix}`] = null; // no file, just a URL
+  window[`_pendingUpload_${prefix}`] = null;
   document.getElementById(`${prefix}FinalImage`).value = url;
   if (url) _showImgPreview(prefix, url, '');
   else _clearPreviewBox(prefix);
@@ -530,24 +540,6 @@ function clearImgPreview(prefix) {
 
 function _clearPreviewBox(prefix) {
   document.getElementById(`${prefix}-img-preview`).innerHTML = '<span class="img-placeholder">No image selected</span>';
-}
-
-/** Actually POST the file to /api/upload and return the saved path */
-async function uploadImageFile(file) {
-  try {
-    showToast('⬆️ Uploading image…');
-    const fd = new FormData();
-    fd.append('image', file);
-    const res = await fetch('/api/upload', { method: 'POST', body: fd });
-    if (!res.ok) throw new Error(await res.text());
-    const data = await res.json();
-    showToast('✅ Image uploaded!');
-    return data.path;
-  } catch (err) {
-    console.error('Upload error:', err);
-    showToast('⚠️ Image upload failed — check server logs');
-    return null;
-  }
 }
 
 // ==================== GLOBAL ACCESS & INIT ====================
