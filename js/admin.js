@@ -216,10 +216,13 @@ async function saveEditedItem() {
     });
   }
 
-  await saveAdminMenu();
+  const ok = await saveAdminMenu();
   buildSections();
-  closeAdminEditModal();
-  showToast("✅ Changes saved successfully!");
+  if (ok) {
+    closeAdminEditModal();
+    showToast("✅ Changes saved!");
+  }
+  // If ok is false, the modal stays open and saveAdminMenu already showed the error toast
 }
 
 function closeAdminEditModal() {
@@ -249,16 +252,24 @@ async function deleteItemInline(catId, itemId) {
 }
 
 async function saveAdminMenu() {
-  if (!checkAdminAccess()) return;
+  if (!checkAdminAccess()) return false;
   try {
-    await fetch('/api/menu', {
+    const res = await fetch('/api/menu', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(adminMenu)
     });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => res.status);
+      console.error('saveAdminMenu server error:', errText);
+      showToast(`⚠️ Save failed (${res.status}) — image may be too large`);
+      return false;
+    }
+    return true;
   } catch (e) {
-    showToast('⚠️ Failed to save menu');
+    showToast('⚠️ Failed to save menu — check connection');
     console.error(e);
+    return false;
   }
 }
 
@@ -443,10 +454,12 @@ async function saveNewMenuItem() {
   if (!window.adminMenu[catId]) window.adminMenu[catId] = [];
   window.adminMenu[catId].push(newItem);
 
-  await saveAdminMenu();
+  const ok = await saveAdminMenu();
   buildSections();
-  closeAddMenuModal();
-  showToast(`✅ New item "${name}" added!`);
+  if (ok) {
+    closeAddMenuModal();
+    showToast(`✅ "${name}" added!`);
+  }
 }
 
 // ==================== IMAGE UPLOAD HELPERS ====================
@@ -475,37 +488,31 @@ function handleImgDrop(event, prefix) {
   _storeImgFile(prefix, file);
 }
 
-/** Store the pending file — read as base64 immediately and store in the hidden field */
+/** Store the pending file — always resize+compress to keep base64 small for MongoDB */
 function _storeImgFile(prefix, file) {
-  if (file.size > 2 * 1024 * 1024) {
-    // Resize/compress large images before storing as base64
-    _resizeAndStore(prefix, file);
-  } else {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const dataUrl = e.target.result;
-      document.getElementById(`${prefix}FinalImage`).value = dataUrl;
-      _showImgPreview(prefix, dataUrl, file.name);
-    };
-    reader.readAsDataURL(file);
-  }
+  _resizeAndStore(prefix, file);
 }
 
-/** Resize image to max 800px wide before base64 encoding to keep MongoDB doc size sane */
+/** Resize image to max 600px, JPEG 0.72 quality — keeps base64 under ~150KB */
 function _resizeAndStore(prefix, file) {
   const reader = new FileReader();
   reader.onload = e => {
     const img = new Image();
     img.onload = () => {
-      const MAX = 800;
+      const MAX = 600;
       let w = img.width, h = img.height;
-      if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+      // Scale down to fit within MAX x MAX box
+      if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
+      else        { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+      // Warn if still large
+      const kb = Math.round(dataUrl.length * 0.75 / 1024);
+      if (kb > 500) showToast(`⚠️ Image is ${kb}KB after compression — consider a smaller file`);
       document.getElementById(`${prefix}FinalImage`).value = dataUrl;
-      _showImgPreview(prefix, dataUrl, file.name);
+      _showImgPreview(prefix, dataUrl, `${file.name} (compressed to ~${kb}KB)`);
     };
     img.src = e.target.result;
   };
