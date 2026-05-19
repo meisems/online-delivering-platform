@@ -98,7 +98,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg-page);color:var(--text-
 
 /* ══ HERO ══ */
 /* ══ TRI-COLOR HERO (Green · White stripe · Red) ══ */
-.hero{background:linear-gradient(150deg,#17a050 0%,#22c060 55%,#17a050 100%);padding:52px 24px 72px;color:#fff;position:relative;overflow:hidden}
+.hero{background:linear-gradient(150deg,#0d4a1e 0%,#176030 55%,#0d4a1e 100%);padding:52px 24px 72px;color:#fff;position:relative;overflow:hidden}
 
 /* Subtle dot texture on the green section */
 .hero::before{content:'';position:absolute;inset:0;pointer-events:none;
