@@ -105,10 +105,12 @@ function cardHTML(item, catId = null) {
   
   if (item.images && item.images.length > 0) {
     let imgSrc = item.images[0];
-    
-    // Support external URLs (http/https)
-    if (imgSrc.startsWith('http')) {
-      // External link - no modification needed
+
+    // Base64 data URLs and /api/image paths need no modification
+    if (imgSrc.startsWith('data:') || imgSrc.startsWith('/api/image')) {
+      // use as-is
+    } else if (imgSrc.startsWith('http')) {
+      // external URL — no modification
     } else if (!imgSrc.startsWith('/images/')) {
       if (imgSrc.startsWith('images/')) imgSrc = '/' + imgSrc;
       else imgSrc = '/images/' + imgSrc.replace(/^\/+/, '');
@@ -303,6 +305,8 @@ function clearSearch() {
 
 function getFullImagePath(path) {
   if (!path) return '';
+  if (path.startsWith('data:')) return path;       // base64
+  if (path.startsWith('/api/image')) return path;  // stored image
   if (path.startsWith('http')) return path;
   if (path.startsWith('/images/')) return path;
   if (path.startsWith('images/')) return '/' + path;
