@@ -199,8 +199,12 @@ async function saveEditedItem() {
   const tagVal = document.getElementById('editTag').value;
   if (tagVal) { item.tag = tagVal; } else { delete item.tag; }
 
-  // Image base64/URL is already stored in the hidden field by _storeImgFile or updateImgPreview
-  const finalImg = document.getElementById('editFinalImage').value.trim();
+  // If an image was picked via file upload, push it to /api/image first
+  let finalImg = document.getElementById('editFinalImage').value.trim();
+  if (finalImg === '__pending__') {
+    finalImg = await _uploadImageData('edit');
+    if (!finalImg) return; // upload failed — toast already shown, modal stays open
+  }
   if (finalImg) item.images = [finalImg];
 
   if (!item.variants || item.variants.length === 0) {
@@ -413,8 +417,12 @@ async function saveNewMenuItem() {
     return;
   }
 
-  // Image base64/URL is already stored in the hidden field by _storeImgFile or updateImgPreview
-  const imageUrl = document.getElementById('newFinalImage').value.trim();
+  // If an image was picked via file upload, push it to /api/image first
+  let imageUrl = document.getElementById('newFinalImage').value.trim();
+  if (imageUrl === '__pending__') {
+    imageUrl = await _uploadImageData('new');
+    if (!imageUrl) return; // upload failed — toast already shown, modal stays open
+  }
 
   let newItem = {
     id: Date.now(),
@@ -488,35 +496,57 @@ function handleImgDrop(event, prefix) {
   _storeImgFile(prefix, file);
 }
 
-/** Store the pending file — always resize+compress to keep base64 small for MongoDB */
+/** Store the pending file — resize+compress, keep base64 in memory until save */
 function _storeImgFile(prefix, file) {
-  _resizeAndStore(prefix, file);
-}
-
-/** Resize image to max 600px, JPEG 0.72 quality — keeps base64 under ~150KB */
-function _resizeAndStore(prefix, file) {
   const reader = new FileReader();
   reader.onload = e => {
     const img = new Image();
     img.onload = () => {
       const MAX = 600;
       let w = img.width, h = img.height;
-      // Scale down to fit within MAX x MAX box
       if (w > h) { if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; } }
       else        { if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; } }
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
-      // Warn if still large
-      const kb = Math.round(dataUrl.length * 0.75 / 1024);
-      if (kb > 500) showToast(`⚠️ Image is ${kb}KB after compression — consider a smaller file`);
-      document.getElementById(`${prefix}FinalImage`).value = dataUrl;
-      _showImgPreview(prefix, dataUrl, `${file.name} (compressed to ~${kb}KB)`);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+      // Store base64 in memory (not in DOM input) to avoid 414
+      window[`_imgData_${prefix}`] = dataUrl;
+      document.getElementById(`${prefix}FinalImage`).value = '__pending__';
+      _showImgPreview(prefix, dataUrl, file.name);
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+/** Upload base64 to /api/image, returns the permanent URL or null on failure */
+async function _uploadImageData(prefix) {
+  const dataUrl = window[`_imgData_${prefix}`];
+  if (!dataUrl) return null;
+
+  const matches = dataUrl.match(/^data:(.+);base64,(.+)$/);
+  if (!matches) return null;
+
+  try {
+    showToast('⬆️ Saving image…');
+    const res = await fetch('/api/image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mimeType: matches[1], data: matches[2] })
+    });
+    if (!res.ok) {
+      showToast('⚠️ Image upload failed (' + res.status + ')');
+      return null;
+    }
+    const result = await res.json();
+    window[`_imgData_${prefix}`] = null;
+    return result.url; // e.g. /api/image/img_1234567890
+  } catch (err) {
+    console.error('Image upload error:', err);
+    showToast('⚠️ Image upload failed — check connection');
+    return null;
+  }
 }
 
 /** Called when URL input changes */
@@ -537,7 +567,7 @@ function _showImgPreview(prefix, src, filename) {
 }
 
 function clearImgPreview(prefix) {
-  window[`_pendingUpload_${prefix}`] = null;
+  window[`_imgData_${prefix}`] = null;
   const finalEl = document.getElementById(`${prefix}FinalImage`);
   if (finalEl) finalEl.value = '';
   const urlEl = document.getElementById(`${prefix}ImageUrl`);
